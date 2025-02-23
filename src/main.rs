@@ -2,7 +2,20 @@ mod job; // References job.rs file
 mod application; // References application.rs file
 mod list; // For saving list data to a file
 
-#[tokio::main] // Requires the `attributes` feature of `async-std`
+use rusqlite::{Connection, Result};
+
+fn main() -> Result<()> {
+    // Job application database file:
+    let database_file: &str = "jobs_data.db";
+    
+    // Create an SQLite database file. Open the database
+    // file if it already exists.
+    let connection = Connection::open(database_file)?;
+
+    Ok(())
+}
+
+/*#[tokio::main] // Requires the `attributes` feature of `async-std`
 async fn main() -> Result<(), sqlx::Error> {
     let mut apps = application::Applications::new();
     apps.add_job();
@@ -12,4 +25,4 @@ async fn main() -> Result<(), sqlx::Error> {
     let _ = list::print_list(apps); 
 
     Ok(())
-}
+}*/

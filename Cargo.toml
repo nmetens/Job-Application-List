@@ -5,6 +5,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
+rusqlite = "0.33.0"
 # From creates.io:
-sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "macros"] }
-tokio = { version = "1", features = ["full"] }
+#sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "macros"] }
+#tokio = { version = "1", features = ["full"] }
