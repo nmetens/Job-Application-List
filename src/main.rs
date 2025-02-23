@@ -22,6 +22,18 @@ fn create_table(connection: rusqlite::Connection) -> Result<(), rusqlite::Error>
     Ok(())
 }
 
+/** Pass in the database connection and the job to add to the database jobs table: */
+fn enter_data(connection: rusqlite::Connection, a_job: job::Job) -> Result<(), rusqlite::Error> {
+    // Enter data into database:
+    connection.execute(
+        "INSERT INTO ?table (job_title, hourly_rate, applied) VALUES (?1, ?2, ?3)",
+        (a_job.get_title(), a_job.get_hourly(), a_job.get_applied()),
+    )?;
+    Ok(())
+}
+
+/** Main method where an application is created, then a table inside a database,
+    where jobs are poppulated into tables and stored in the database. */
 fn main() -> Result<()> {
     let mut apps = application::Applications::new();
 /*  apps.add_job();
@@ -36,21 +48,9 @@ fn main() -> Result<()> {
     let connection = Connection::open(database_file)?;
 
     let csv_file: &str = "application.csv";
-    if let Err(e) = read_csv_file(csv_file, &apps) {
+    if let Err(e) = read_csv_file(csv_file, &mut apps) {
         eprintln!("Error: {}", e);
     }
 
     Ok(())
 }
-
-/*#[tokio::main] // Requires the `attributes` feature of `async-std`
-async fn main() -> Result<(), sqlx::Error> {
-    let mut apps = application::Applications::new();
-    apps.add_job();
-    apps.view_apps();
-
-    // Output all jobs to a file in 'output' directory:
-    let _ = list::print_list(apps); 
-
-    Ok(())
-}*/

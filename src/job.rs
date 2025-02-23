@@ -1,7 +1,6 @@
 /** This is the jobs file that contains
   * the struct for a job and its implementation.
   */
-
 // Each job will have an id,
 // a job_title, an hourly rate,
 // and whether the user has applied
@@ -36,5 +35,17 @@ impl Job {
     // Update application status:
     pub fn _applied(&mut self,  applied: bool) {
         self.applied = applied;
+    }
+
+    pub fn get_title(&self) -> String {
+        self.title.clone()
+    }
+
+    pub fn get_hourly(&self) -> f32 {
+        self.hourly.clone()
+    }
+    
+    pub fn get_applied(&self) -> bool {
+        self.applied.clone()
     }
 }

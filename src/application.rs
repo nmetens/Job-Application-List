@@ -23,43 +23,11 @@ impl Applications {
         }
     }
 
-    pub fn add_job(&mut self) {
-        println!("Enter the job title: ");
-        let mut job_title = String::new();
-
-        io::stdin()
-            .read_line(&mut job_title)
-            .expect("Failed to read");
-        job_title = (job_title.trim()).to_string(); // Remove '\n' from input
-
-        println!("Enter the hourly rate: ");
-        let mut job_rate_str = String::new();
-        let mut job_rate: f32 = 0.0;
-
-        // Ask the user for an hourly rate
-        // until a valid one is inputed:
-        let mut valid_rate: bool = false;
-        while !valid_rate {
-            job_rate_str.clear(); // Clear each time before reading new value
-            io::stdin() // Read the input
-                .read_line(&mut job_rate_str)
-                .expect("Failed to read");
-
-            // If the input is correct, assign it to an int,
-            // otherwise display an error message and try again:
-            job_rate = match job_rate_str.trim().parse::<f32>() {
-                Ok(rate) => { 
-                    valid_rate = true; // Update validity of rate
-                    rate // Return the rate
-                },
-                Err(_) => {
-                    println!("Invalid hourly pay rate. Try again: ");
-                    continue;
-                }
-            };
-        }
-        
-        self.jobs.push(Job::new(self.total_jobs, job_title, job_rate));
+    //pub fn add_job(&mut self) {
+    /** Method that takes a string and an int for setting the job_title 
+        and the job_rate from csv file data: */
+    pub fn add_job(&mut self, job_title: &str, job_rate: f32) {
+        self.jobs.push(Job::new(self.total_jobs, job_title.to_string(), job_rate as f32));
         self.total_jobs += 1;
     }
 
