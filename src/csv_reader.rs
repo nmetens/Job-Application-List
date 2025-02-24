@@ -18,9 +18,11 @@ pub fn read_csv_file<'a>(file: &'a str, app: &'a mut application::Applications) 
                 let hourly_rate: f32 = record.get(2)
                     .and_then(|s| s.parse::<f32>().ok()) // Parse if Some, return None if parse fails
                     .unwrap_or(0.0); // Default to 0.0 if None or parsing fails
-                //let applied = record.get(3).unwrap_or("N/A");
+                let applied: u32 = record.get(3)
+                    .and_then(|s| s.parse::<u32>().ok()) 
+                    .unwrap_or(0); // Default to (0) false if None or parsing fails
 
-                app.add_job(job_title, hourly_rate); // Add the job to the application.
+                app.add_job(job_title, hourly_rate, applied); // Add the job to the application.
             }
             Err(e) => eprintln!("Error reading job file: {}", e),
         }

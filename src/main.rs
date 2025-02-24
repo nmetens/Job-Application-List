@@ -78,6 +78,22 @@ fn get_data(connection: &rusqlite::Connection) -> Result<(), rusqlite::Error> {
     Ok(())
 }
 
+/// Drop the table_name from the database.
+/// 
+/// # Arguments
+/// * `connection` - A reference to an active SQLite connection (rusqlite::Connection).
+/// * `table_name` - The name of the table that will be dropped.
+/// 
+/// # Returns
+/// * `Ok(())` if query exists on success.
+/// * `Err(rusqlite::Error)` if an error occurs. 
+fn drop_table(connection: &rusqlite::Connection, table_name: &str) -> Result<(), rusqlite::Error> {
+    let query = format!("DROP TABLE IF EXISTS {}", table_name);
+    connection.execute(&query, [])?;
+    println!("Table '{}' has been dropped.", table_name);
+    Ok(())
+}
+
 /** Main method where an application is created, then a table inside a database,
     where jobs are poppulated into tables and stored in the database. */
 fn main() -> Result<()> {
@@ -89,6 +105,8 @@ fn main() -> Result<()> {
     // Create an SQLite database file. Open the database
     // file if it already exists.
     let connection = Connection::open(database_file)?;
+
+    let _ = drop_table(&connection, "jobs"); // Remove the table each time for testing.
 
     // Create a table:
     if let Err(e) = create_table(&connection) {

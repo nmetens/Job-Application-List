@@ -11,18 +11,18 @@ pub struct Job {
     //_job_id: u32,
     title: String,
     hourly: f32,
-    applied: bool,
+    applied: u32,
 }
 
 impl Job {
     // Constructor:
     //pub fn new(job_id: u32, title: String, hourly: f32) -> Self {
-    pub fn new(title: String, hourly: f32) -> Self {
+    pub fn new(title: String, hourly: f32, applied: u32) -> Self {
         Self {
             //job_id,
             title,
             hourly,
-            applied: false,
+            applied
         } // Return self
     }
 
@@ -37,7 +37,7 @@ impl Job {
     }
 
     // Update application status:
-    pub fn _applied(&mut self,  applied: bool) {
+    pub fn _applied(&mut self,  applied: u32) {
         self.applied = applied;
     }
 
@@ -49,7 +49,7 @@ impl Job {
         self.hourly.clone()
     }
     
-    pub fn get_applied(&self) -> bool {
+    pub fn get_applied(&self) -> u32 {
         self.applied.clone()
     }
 }

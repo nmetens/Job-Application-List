@@ -1,9 +1,9 @@
 job_id,job_title,hourly_rate,applied
-1,Bus Driver,$31,no
-2,Train Driver,$40,yes
-3,Coffee Barista,$16,no
-4,Trader Joe's Crew,$19, yes
-5,Tutor,$17,yes
-6,Waiter,$15,no
-7,Police,$45,yes
-8,Delivery,$20,no
+1,Bus Driver,31,0
+2,Train Driver,40,1
+3,Coffee Barista,16,0
+4,Trader Joe's Crew,19,1
+5,Tutor,17,1
+6,Waiter,15,1
+7,Police,45,0
+8,Delivery,20,1
