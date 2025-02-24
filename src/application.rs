@@ -4,7 +4,6 @@
   * application.
   */
 
-use std::io; // To get user input for app
 use crate::job::Job; // To use the job.rs methods module
 
 // Holds a list of jobs:
@@ -27,15 +26,16 @@ impl Applications {
     /** Method that takes a string and an int for setting the job_title 
         and the job_rate from csv file data: */
     pub fn add_job(&mut self, job_title: &str, job_rate: f32) {
-        self.jobs.push(Job::new(self.total_jobs, job_title.to_string(), job_rate as f32));
+        //self.jobs.push(Job::new(self.total_jobs, job_title.to_string(), job_rate as f32));
+        self.jobs.push(Job::new(job_title.to_string(), job_rate as f32));
         self.total_jobs += 1;
     }
 
     // Loop through jobs list and display each job:
-    pub fn view_apps(&mut self) -> String {
+    pub fn _view_apps(&mut self) -> String {
         let mut data: String = "".to_string();
         for job in &self.jobs {
-            data += &(job.display() + "\n");
+            data += &(job._display() + "\n");
         }
         data
     }

@@ -8,7 +8,7 @@
 //#[derive(Copy, Clone)] // Allows copies of struct objects
 #[derive(Clone)]
 pub struct Job {
-    job_id: u32,
+    //_job_id: u32,
     title: String,
     hourly: f32,
     applied: bool,
@@ -16,9 +16,10 @@ pub struct Job {
 
 impl Job {
     // Constructor:
-    pub fn new(job_id: u32, title: String, hourly: f32) -> Self {
+    //pub fn new(job_id: u32, title: String, hourly: f32) -> Self {
+    pub fn new(title: String, hourly: f32) -> Self {
         Self {
-            job_id,
+            //job_id,
             title,
             hourly,
             applied: false,
@@ -26,11 +27,13 @@ impl Job {
     }
 
     // Display job info:
-    pub fn display(&self) -> String {
+    pub fn _display(&self) -> String {
         //println!("Job ID: {}. Title: {}. Pay: {}. Applied: {}", 
         //self.job_id, self.title, self.hourly, self.applied);
-        format!("Job ID: {0}. Title: {1}. Pay: {2}. Applied: {3}", 
-        self.job_id, self.title, self.hourly, self.applied).to_string() // Return the String
+        //format!("Job ID: {0}. Title: {1}. Pay: {2}. Applied: {3}", 
+        format!("Title: {0}. Pay: {1}. Applied: {2}", 
+        //self.job_id, self.title, self.hourly, self.applied).to_string() // Return the String
+        self.title, self.hourly, self.applied).to_string() // Return the String
     }
 
     // Update application status:
