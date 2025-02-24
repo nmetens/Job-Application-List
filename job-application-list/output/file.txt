@@ -1,2 +1,0 @@
-Job ID: 0. Title: Driver. Pay: 700. Applied: false
-
