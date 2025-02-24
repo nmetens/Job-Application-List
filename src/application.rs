@@ -39,4 +39,8 @@ impl Applications {
         }
         data
     }
+
+    pub fn get_jobs(&self) -> Vec<Job> {
+        self.jobs.clone()
+    }
 }

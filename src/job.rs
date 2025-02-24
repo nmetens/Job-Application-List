@@ -6,6 +6,7 @@
 // and whether the user has applied
 // to the job or not.
 //#[derive(Copy, Clone)] // Allows copies of struct objects
+#[derive(Clone)]
 pub struct Job {
     job_id: u32,
     title: String,
