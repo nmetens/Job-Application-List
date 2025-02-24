@@ -1,21 +1,20 @@
-mod job; // References job.rs file
 mod application; // References application.rs file
-mod list; // For saving list data to a file
-mod csv_reader; // For reading csv file
+mod csv_reader;
+mod job; // References job.rs file
+mod list; // For saving list data to a file // For reading csv file
 use crate::csv_reader::read_csv_file;
 mod database_methods;
 
 use rusqlite::{Connection, Result};
 
-
 /** Main method where an application is created, then a table inside a database,
-    where jobs are poppulated into tables and stored in the database. */
+where jobs are poppulated into tables and stored in the database. */
 fn main() -> Result<()> {
     let mut apps = application::Applications::new();
 
     // Job application database file:
     let database_file: &str = "jobs_data.db";
-    
+
     // Create an SQLite database file. Open the database
     // file if it already exists.
     let connection = Connection::open(database_file)?;
