@@ -3,6 +3,8 @@
 # To import cargo for rust into project repo:
 . "$HOME/.cargo/env"
 
+clear # Clear the screen
+
 # Commands to run the project and build:
 #cargo build
 
