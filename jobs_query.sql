@@ -1,3 +1,3 @@
 .headers on
 .mode column
-SELECT * FROM jobs ORDER BY hourly_rate ASC
+SELECT * FROM jobs WHERE applied = 0
