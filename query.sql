@@ -1,3 +1,6 @@
+.headers on
+.mode column
+
 /* Insert a new job into the jobs table in the database: */
 /* INSERT INTO jobs (job_title, hourly_rate, applied) VALUES ('Software Engineer', 60, 1); */
 
