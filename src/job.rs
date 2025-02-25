@@ -2,15 +2,36 @@
 // Class: Rust 523
 // Professor: Bart Massey
 
-/** This is the jobs file that contains
- * the struct for a job and its implementation.
- */
+//! # Job Module
+//!
+//! This is the public jobs module. It contains the 
+//! Job struct and its implementations for a job. Each
+//! Jon object is encapsulated by the application object.
+
 // Each job will have an id,
 // a job_title, an hourly rate,
 // and whether the user has applied
 // to the job or not.
 //#[derive(Copy, Clone)] // Allows copies of struct objects
-#[derive(Clone)]
+
+/// Represting a Job in the application.
+///
+/// The `Job` struct holds the details for a job.
+///
+/// # Fields
+/// - `title`: The job title as a `String` (position applying to).
+/// - `hourly`: The hourly rate (pay) in floating point of the job.
+/// - `applied`: The number (1 or 0) for whether or not the job has been applied to.
+/// 
+/// # Example
+/// ```
+/// let job = Job {
+///     title: "Bus Driver".to_string(),
+///     hourly: 27.50,
+///     applied: 1, // True
+/// };
+/// ```
+#[derive(Clone)] // Clone trait to make copied of a Job object.
 pub struct Job {
     //_job_id: u32,
     title: String,
@@ -60,5 +81,39 @@ impl Job {
 
     pub fn get_applied(&self) -> u32 {
         self.applied.clone()
+    }
+}
+
+/// Testing the Job struct from objects.
+///
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_create_new_object() {
+        let title = "Train Driver".to_string();
+        let _job = Job::new(title, 30.50, 1);
+    }
+
+    #[test]
+    fn test_get_title() {
+        let job = Job::new("Train Driver".to_string(), 30.50, 1);
+        assert_eq!(job.title, "Train Driver".to_string());
+        assert_eq!(job.get_title(), "Train Driver".to_string());
+    }
+
+    #[test]
+    fn test_get_hourly() {
+        let job = Job::new("Train Driver".to_string(), 30.50, 1);
+        assert_eq!(job.hourly, 30.50);
+        assert_eq!(job.get_hourly(), 30.50);
+    }
+
+    #[test]
+    fn test_get_applied() {
+        let job = Job::new("Train Driver".to_string(), 30.50, 1);
+        assert_eq!(job.applied, 1);
+        assert_eq!(job.get_applied(), 1);
     }
 }
