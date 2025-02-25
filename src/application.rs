@@ -54,7 +54,7 @@ impl Applications {
         self.total_jobs += 1;
     }
 
-    pub fn add_job_obj(&mut self, job: Job) {
+    pub fn _add_job_obj(&mut self, job: Job) {
         self.jobs.push(job);
         self.total_jobs += 1;
     }
@@ -86,7 +86,7 @@ mod tests {
     fn test_add_job_obj() {
         let job = Job::new("Waiter".to_string(), 16.50, 0);
         let mut app = Applications::new();
-        app.add_job_obj(job.clone());
+        app._add_job_obj(job.clone());
 
         assert_eq!(app.total_jobs, 1);
         assert_eq!(app.jobs.get(0).expect("ERROR").get_title(), job.get_title());
@@ -110,7 +110,7 @@ mod tests {
     fn test_get_jobs() {
         let job = Job::new("Waiter".to_string(), 16.50, 0);
         let mut app = Applications::new();
-        app.add_job_obj(job.clone());
+        app._add_job_obj(job.clone());
 
         assert_eq!(app.total_jobs, 1);
         assert_eq!(app.get_jobs().get(0).expect("ERROR").get_title(), job.get_title());

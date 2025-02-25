@@ -39,10 +39,12 @@ use std::error::Error;
 ///     total_jobs: 0,
 /// };
 ///
-/// match read_csv_file("jobs.csv", &mut app) {
+/// match read_csv_file("application.csv", &mut app) {
 ///     Ok(updated_app) => println!("CSV file loaded successfully!"),
 ///     Err(e) => eprintln!("Failed to read CSV: {}", e),
 /// }
+/// // Assumes that the application.csv file doesn't change: 
+/// assert_eq!(app.get(0).expect("ERROR").get_title(), "Bus Driver");
 /// ```
 pub fn read_csv_file<'a>(
     file: &'a str,
@@ -69,4 +71,22 @@ pub fn read_csv_file<'a>(
         }
     }
     Ok(app)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use application::*;
+
+    #[test]
+    fn test_read_csv_file() {
+        let mut app = Applications::new();
+
+        match read_csv_file("application.csv", &mut app) {
+            Ok(_updated_app) => println!("CSV file loaded successfully!"),
+            Err(e) => eprintln!("Failed to read CSV: {}", e),
+        }
+        assert_eq!(app.get_jobs().get(0).expect("ERROR").get_title(), "Bus Driver");
+        assert_eq!(app.get_jobs().get(3).expect("ERROR").get_hourly(), 19.0);
+    }
 }
