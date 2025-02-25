@@ -54,6 +54,11 @@ impl Applications {
         self.total_jobs += 1;
     }
 
+    pub fn add_job_obj(&mut self, job: Job) {
+        self.jobs.push(job);
+        self.total_jobs += 1;
+    }
+
     // Loop through jobs list and display each job:
     pub fn _view_apps(&mut self) -> String {
         let mut data: String = "".to_string();
@@ -65,5 +70,51 @@ impl Applications {
 
     pub fn get_jobs(&self) -> Vec<Job> {
         self.jobs.clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_create_new_object() {
+        let _app = Applications::new();
+    }
+
+    #[test]
+    fn test_add_job_obj() {
+        let job = Job::new("Waiter".to_string(), 16.50, 0);
+        let mut app = Applications::new();
+        app.add_job_obj(job.clone());
+
+        assert_eq!(app.total_jobs, 1);
+        assert_eq!(app.jobs.get(0).expect("ERROR").get_title(), job.get_title());
+        assert_eq!(app.jobs.get(0).expect("ERROR").get_hourly(), job.get_hourly());
+        assert_eq!(app.jobs.get(0).expect("ERROR").get_applied(), job.get_applied());
+    }
+
+    #[test]
+    fn test_add_job() {
+        let job = Job::new("Waiter".to_string(), 16.50, 0);
+        let mut app = Applications::new();
+        app.add_job("Waiter", 16.50, 0);
+
+        assert_eq!(app.total_jobs, 1);
+        assert_eq!(app.jobs.get(0).expect("ERROR").get_title(), job.get_title());
+        assert_eq!(app.jobs.get(0).expect("ERROR").get_hourly(), job.get_hourly());
+        assert_eq!(app.jobs.get(0).expect("ERROR").get_applied(), job.get_applied());
+    }
+
+    #[test]
+    fn test_get_jobs() {
+        let job = Job::new("Waiter".to_string(), 16.50, 0);
+        let mut app = Applications::new();
+        app.add_job_obj(job.clone());
+
+        assert_eq!(app.total_jobs, 1);
+        assert_eq!(app.get_jobs().get(0).expect("ERROR").get_title(), job.get_title());
+        assert_eq!(app.get_jobs().get(0).expect("ERROR").get_hourly(), job.get_hourly());
+        assert_eq!(app.get_jobs().get(0).expect("ERROR").get_applied(), job.get_applied());
     }
 }
