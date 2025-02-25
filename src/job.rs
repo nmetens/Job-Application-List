@@ -1,3 +1,7 @@
+// Author: Nathan Metens
+// Class: Rust 523
+// Professor: Bart Massey
+
 /** This is the jobs file that contains
  * the struct for a job and its implementation.
  */

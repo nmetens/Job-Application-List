@@ -1,7 +1,11 @@
-/** This module containes the methods used to create, access, add to, and
-remove from the database. Each method is public and requires a connection
-to an active rusqlite::Connection object in order to modify the database.
-*/
+// Author: Nathan Metens
+// Class: Rust 523
+// Professor: Bart Massey
+
+//! This module containes the methods used to create, access, add to, and
+//! remove from the database. Each method is public and requires a connection
+//! to an active rusqlite::Connection object in order to modify the database.
+
 use crate::job;
 
 /// Creates a `jobs` table in the SQLite database if it does not already exist.

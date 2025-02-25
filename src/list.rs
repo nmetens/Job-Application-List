@@ -1,3 +1,7 @@
+// Author: Nathan Metens
+// Class: Rust 523
+// Professor: Bart Massey
+
 use crate::application::Applications;
 use std::fs::File;
 use std::io::prelude::*;

@@ -1,3 +1,7 @@
+// Author: Nathan Metens
+// Class: Rust 523
+// Professor: Bart Massey
+
 mod application; // References application.rs file
 mod csv_reader;
 mod job; // References job.rs file

@@ -67,6 +67,9 @@ case "$1" in
     test)
         cargo test
         ;;
+    docs)
+        cargo doc --open
+        ;;
     *) # Display the usage for the project when no 
        # command line args are passed in to bash file:
         echo "Usage: $0 <command>"
@@ -78,6 +81,7 @@ case "$1" in
         echo "  clippy          - Rust clippy"
         echo "  run             - Run the project in rust"
         echo "  test            - Run test cases in rust"
+        echo "  docs            - Open the project documentation"
         echo ""
         echo "Examples:"
         echo "  $0 sql display      # Display database job table"
