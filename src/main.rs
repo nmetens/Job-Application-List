@@ -10,10 +10,11 @@ use crate::csv_reader::read_csv_file;
 mod database_methods;
 
 use rusqlite::{Connection, Result};
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 
 /** Main method where an application is created, then a table inside a database,
 where jobs are poppulated into tables and stored in the database. */
-fn main() -> Result<()> {
+/*fn main() -> Result<()> {
     let mut apps = application::Applications::new();
 
     // Job application database file:
@@ -49,4 +50,21 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+
+
+}*/
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    let host: &str = "127.0.0.1"; // localhost
+    let port: &str = "8000"; // listen on port 8000 for requests to server.
+
+    let location: &str = &(host.to_owned() + ":" +  port);
+
+    HttpServer::new(|| {
+        App::new()
+            .route("/", web::get().to(|| async { HttpResponse::Ok().body("Hello") }))
+    })
+    .bind(location)?
+    .run()
+    .await
 }

@@ -8,12 +8,6 @@
 //! Job struct and its implementations for a job. Each
 //! Jon object is encapsulated by the application object.
 
-// Each job will have an id,
-// a job_title, an hourly rate,
-// and whether the user has applied
-// to the job or not.
-//#[derive(Copy, Clone)] // Allows copies of struct objects
-
 /// Represting a Job in the application.
 ///
 /// The `Job` struct holds the details for a job.

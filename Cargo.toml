@@ -8,6 +8,7 @@ license = "MIT OR Apache-2.0"
 csv = "1.3.1"
 run = "0.1.0"
 rusqlite = "0.33.0"
+actix-web = "4" # Resource: https://actix.rs/docs/application
 # From creates.io:
 #sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "macros"] }
 #tokio = { version = "1", features = ["full"] }
