@@ -10,7 +10,6 @@ use crate::csv_reader::read_csv_file;
 mod database_methods;
 
 use rusqlite::{Connection, Result};
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 
 /** Main method where an application is created, then a table inside a database,
 where jobs are poppulated into tables and stored in the database. */
@@ -53,12 +52,45 @@ where jobs are poppulated into tables and stored in the database. */
 
 
 }*/
+
+// Logging used for the server side to 
+// see GET and POST requests:
+use log::{info, LevelFilter};
+use env_logger::Builder;
+use std::env;
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use std::io::Write;
+
+/// Log messages from the server side.
+fn log(message: &str) {
+   info!("{}", message); 
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let host: &str = "127.0.0.1"; // localhost
     let port: &str = "8000"; // listen on port 8000 for requests to server.
 
-    let location: &str = &(host.to_owned() + ":" +  port);
+    let location: &str = &(host.to_owned() + ":" +  port); // Where the server is listening.
+
+    // Set RUST_LOG=info to allow server-side loggin:
+    if env::var("RUST_LOG").is_err() { env::set_var("RUST_LOG", "info"); }
+
+    // Create a custom logging system with specific filters to simplify loggin:
+    Builder::new()
+        // Define a custom log format to display only the message:
+        .format(|buf, record| {
+            writeln!(buf, "{}", record.args()) // No timestamp or level or workers.
+        })
+        // Filter internal Actix logs that are unnecessary:
+        .filter(Some("actix_web"), LevelFilter::Error) // Suppress actix_web logs.
+        .filter(Some("actix_rt"), LevelFilter::Error) // Suppress Actix runtime logs.
+        .filter(Some("actix_server"), LevelFilter::Error) // Suppress Actix server logs.
+        .filter(None, LevelFilter::Info) // Allow only my info-level logs.
+        .init();
+
+    // Only log my messages, no verbose internal actix logs:
+    log(&("Server listening on \"".to_owned() + location + "\""));
 
     HttpServer::new(|| {
         App::new()
