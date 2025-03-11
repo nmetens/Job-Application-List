@@ -62,6 +62,7 @@ use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use std::io::Write;
 use crate::database_methods::get_jobs;
 use tera::{Tera, Context};
+use actix_files::Files;
 
 /// Log messages from the server side.
 fn log(message: &str) {
@@ -90,7 +91,7 @@ async fn add_jobs(tera: web::Data<Tera>) -> impl Responder {
     HttpResponse::Ok().body(add_page)
 }
 
-async fn list_jobs() -> impl Responder {
+async fn list_jobs(tera: web::Data<Tera>) -> impl Responder {
     // Job application database file:
     let database_file: &str = "jobs_data.db";
 
@@ -107,26 +108,11 @@ async fn list_jobs() -> impl Responder {
     log("Received request: GET /jobs");
     match get_jobs(&connection) {
         Ok(jobs) => {
-            let mut html = String::from("");
+            let mut context = tera::Context::new();
+            context.insert("jobs", &jobs); // Passing the jobs list to the html.
 
-             for job in &jobs {
-                let link_html = format!(r#"<a href="{}" target="_blank">View Job</a>"#, job.get_link());
-
-                 html.push_str(&format!(
-                     "<tr>
-                         <td>{}</td>
-                         <td>{}</td>
-                         <td>{}</td>
-                         <td>{}</td>
-                         <td>{}</td>
-                     </tr>",
-                     job.get_id(), job.get_title(), job.get_hourly(), job.get_applied(), link_html
-                 ));
-             }
-
-             html.push_str("</table></body></html>");
-             info!("Returning {} jobs to client", jobs.len());
-             HttpResponse::Ok().content_type("text/html").body(html)
+            let renderer = tera.render("jobs.html", &context).unwrap();
+            HttpResponse::Ok().content_type("text/html").body(renderer)
         }
         Err(err) => {
              error!("Error fetching jobs: {}", err);
@@ -174,13 +160,14 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            // When url: http://localhost:8000/jobs, call list_jobs() method that connects
+            // When url: http://localhost:8000/jobs, call list_jobs() method that connects.
             // to database of displays jobs in html:
             //.route("/jobs", web::get().to(|| async { HttpResponse::Ok().body(list_jobs) }))
-            .app_data(web::Data::new(tera.clone())) // Add Tera to Actix app data
+            .app_data(web::Data::new(tera.clone())) // Add Tera to Actix app data.
             .route("/", web::get().to(home))
-            .route("/jobs", web::get().to(|| async { list_jobs().await }))
+            .route("/jobs", web::get().to(list_jobs))
             .route("/add", web::get().to(add_jobs))
+            .service(Files::new("/static", "./static").show_files_listing()) // Serve the static style.css files.
     })
     .bind(url)?
     .run()

@@ -27,7 +27,9 @@
 ///     link: None,
 /// };
 /// ```
-#[derive(Clone)] // Clone trait to make copied of a Job object.
+use serde::Serialize; // Serialize trait to pass a job into tera in main.
+
+#[derive(Clone, Serialize)] // Clone trait to make copied of a Job object, and Serialize for tera.
 pub struct Job {
     id: u32,
     title: String,

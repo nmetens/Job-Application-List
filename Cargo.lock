@@ -1110,6 +1110,8 @@ dependencies = [
  "log",
  "run",
  "rusqlite",
+ "serde",
+ "serde_json",
  "tera",
 ]
 
