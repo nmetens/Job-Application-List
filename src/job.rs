@@ -20,28 +20,32 @@
 /// # Example
 /// ```
 /// let job = Job {
+///     id: 1,
 ///     title: "Bus Driver".to_string(),
 ///     hourly: 27.50,
 ///     applied: 1, // True
+///     link: None,
 /// };
 /// ```
 #[derive(Clone)] // Clone trait to make copied of a Job object.
 pub struct Job {
-    //_job_id: u32,
+    id: u32,
     title: String,
     hourly: f32,
     applied: u32,
+    link: String,
 }
 
 impl Job {
     // Constructor:
     //pub fn new(job_id: u32, title: String, hourly: f32) -> Self {
-    pub fn new(title: String, hourly: f32, applied: u32) -> Self {
+    pub fn new(id: u32, title: String, hourly: f32, applied: u32, link: String) -> Self {
         Self {
-            //job_id,
+            id,
             title,
             hourly,
             applied,
+            link,
         } // Return self
     }
 
@@ -59,6 +63,10 @@ impl Job {
         )
         .to_string() // Return the String
     }
+
+    pub fn get_id(&self) -> u32 { self.id.clone() }
+
+    pub fn get_link(&self) -> String { self.link.clone() }
 
     // Update application status:
     pub fn _applied(&mut self, applied: u32) {

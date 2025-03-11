@@ -57,20 +57,23 @@ pub fn enter_data(
 /// # Returns
 /// * `Ok(())` if the query executes successfully.
 /// * `Err(rusqlite::Error)` if an error occurs.
-pub fn get_data(connection: &rusqlite::Connection) -> Result<(), rusqlite::Error> {
+use log::info;
+use crate::job::Job;
+pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite::Error> {
     let mut statement =
         connection.prepare("SELECT id, job_title, hourly_rate, applied FROM jobs")?;
 
     let job_iterator = statement.query_map([], |row| {
-        Ok((
-            row.get::<_, i32>(0)?,    // id (INTEGER)
-            row.get::<_, String>(1)?, // job_title (TEXT)
-            row.get::<_, i32>(2)?,    // hourly_rate (INTEGER, should not be String)
-            row.get::<_, i32>(3)?,    // applied (INTEGER)
+        Ok(Job::new(
+            row.get::<_, u32>(0)?,               // id (INTEGER)
+            row.get::<_, String>(1)?,            // title (TEXT)
+            row.get::<_, f32>(2)?,               // hourly_rate (FLOAT)
+            row.get::<_, u32>(3)?,               // applied (INTEGER)
+            row.get::<_, String>(4).ok().unwrap_or("No Link".to_string()), // link (TEXT)
         ))
     })?;
 
-    for job in job_iterator {
+    /*for job in job_iterator {
         let (id, job_title, hourly_rate, applied) = job?;
         println!(
             "Job {} - Title: {}, Rate: ${}/hr, Applied: {}",
@@ -79,9 +82,19 @@ pub fn get_data(connection: &rusqlite::Connection) -> Result<(), rusqlite::Error
             hourly_rate,
             if applied == 1 { "Yes" } else { "No" } // Convert 1/0 to Yes/No
         );
+    }*/
+
+    let mut jobs = Vec::new();
+    for job in job_iterator {
+        match job {
+            Ok(j) => jobs.push(j),
+            Err(e) => eprintln!("Error parsing job: {}", e),
+        }
     }
 
-    Ok(())
+    info!("Successfully fetched {} jobs", jobs.len());
+
+    Ok(jobs)
 }
 
 /// Drop the table_name from the database.

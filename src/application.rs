@@ -44,12 +44,14 @@ impl Applications {
 
     /** Method that takes a string and an int for setting the job_title
     and the job_rate from csv file data: */
-    pub fn add_job(&mut self, job_title: &str, job_rate: f32, applied: u32) {
+    pub fn add_job(&mut self, id: u32, job_title: &str, job_rate: f32, applied: u32, link: String) {
         //self.jobs.push(Job::new(self.total_jobs, job_title.to_string(), job_rate as f32));
         self.jobs.push(Job::new(
+            id,
             job_title.to_string(),
             job_rate as f32,
             applied as u32,
+            link.to_string()
         ));
         self.total_jobs += 1;
     }

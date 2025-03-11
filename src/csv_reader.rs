@@ -55,6 +55,10 @@ pub fn read_csv_file<'a>(
     for job in csv_reader.records() {
         match job {
             Ok(record) => {
+                let job_id: u32 = record
+                    .get(3)
+                    .and_then(|s| s.parse::<u32>().ok())
+                    .unwrap_or(0); // Default to 0 (false) if None or parsing fails.
                 let job_title = record.get(1).unwrap_or("N/A");
                 let hourly_rate: f32 = record
                     .get(2)
@@ -64,8 +68,9 @@ pub fn read_csv_file<'a>(
                     .get(3)
                     .and_then(|s| s.parse::<u32>().ok())
                     .unwrap_or(0); // Default to 0 (false) if None or parsing fails.
+                let link: String = record.get(4).unwrap_or("N/A").to_string();
 
-                app.add_job(job_title, hourly_rate, applied); // Add the job to the application.
+                app.add_job(job_id, job_title, hourly_rate, applied, link); // Add the job to the application.
             }
             Err(e) => eprintln!("Error reading job file: {}", e),
         }
