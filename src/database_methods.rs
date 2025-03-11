@@ -63,26 +63,22 @@ pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite:
     let mut statement =
         connection.prepare("SELECT id, job_title, hourly_rate, applied FROM jobs")?;
 
+    // Iterate through the database and gather all the lines of data, creating the Job:
     let job_iterator = statement.query_map([], |row| {
-        Ok(Job::new(
-            row.get::<_, u32>(0)?,               // id (INTEGER)
-            row.get::<_, String>(1)?,            // title (TEXT)
-            row.get::<_, f32>(2)?,               // hourly_rate (FLOAT)
-            row.get::<_, u32>(3)?,               // applied (INTEGER)
-            row.get::<_, String>(4).ok().unwrap_or("No Link".to_string()), // link (TEXT)
-        ))
-    })?;
+        let id: u32 = row.get::<_, u32>(0)?;            // id
+        let title: String = row.get::<_, String>(1)?;   // title
+        let hourly: f32 = row.get::<_, f32>(2)?;        // hourly
 
-    /*for job in job_iterator {
-        let (id, job_title, hourly_rate, applied) = job?;
-        println!(
-            "Job {} - Title: {}, Rate: ${}/hr, Applied: {}",
-            id,
-            job_title,
-            hourly_rate,
-            if applied == 1 { "Yes" } else { "No" } // Convert 1/0 to Yes/No
-        );
-    }*/
+        // Properly handle the Result and convert applied value to "Yes" or "No"
+        let applied: u32 = row.get::<_, u32>(3)?;       // applied
+        let applied_status = if applied == 1 { "Yes".to_string() } else { "No".to_string() };
+
+        // link
+        let link: String = row.get::<_, String>(4).ok().unwrap_or("No Link".to_string());
+
+        // Return a new Job instance with applied as "Yes"/"No" instead of "1/0":
+        Ok(Job::new(id, title, hourly, applied_status, link))
+    })?;
 
     let mut jobs = Vec::new();
     for job in job_iterator {

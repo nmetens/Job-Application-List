@@ -23,7 +23,7 @@
 ///     id: 1,
 ///     title: "Bus Driver".to_string(),
 ///     hourly: 27.50,
-///     applied: 1, // True
+///     applied: "Yes", // True
 ///     link: None,
 /// };
 /// ```
@@ -32,14 +32,14 @@ pub struct Job {
     id: u32,
     title: String,
     hourly: f32,
-    applied: u32,
+    applied: String,
     link: String,
 }
 
 impl Job {
     // Constructor:
     //pub fn new(job_id: u32, title: String, hourly: f32) -> Self {
-    pub fn new(id: u32, title: String, hourly: f32, applied: u32, link: String) -> Self {
+    pub fn new(id: u32, title: String, hourly: f32, applied: String, link: String) -> Self {
         Self {
             id,
             title,
@@ -69,7 +69,7 @@ impl Job {
     pub fn get_link(&self) -> String { self.link.clone() }
 
     // Update application status:
-    pub fn _applied(&mut self, applied: u32) {
+    pub fn _applied(&mut self, applied: String) {
         self.applied = applied;
     }
 
@@ -81,7 +81,7 @@ impl Job {
         self.hourly.clone()
     }
 
-    pub fn get_applied(&self) -> u32 {
+    pub fn get_applied(&self) -> String {
         self.applied.clone()
     }
 }
@@ -115,7 +115,7 @@ mod tests {
     #[test]
     fn test_get_applied() {
         let job = Job::new("Train Driver".to_string(), 30.50, 1);
-        assert_eq!(job.applied, 1);
-        assert_eq!(job.get_applied(), 1);
+        assert_eq!(job.applied, "Yes");
+        assert_eq!(job.get_applied(), "Yes");
     }
 }
