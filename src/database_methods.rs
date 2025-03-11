@@ -88,8 +88,7 @@ pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite:
         }
     }
 
-    info!("Successfully fetched {} jobs", jobs.len());
-
+    info!("Fetched {} jobs", jobs.len());
     Ok(jobs)
 }
 

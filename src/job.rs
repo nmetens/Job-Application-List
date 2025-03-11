@@ -51,9 +51,6 @@ impl Job {
 
     // Display job info:
     pub fn _display(&self) -> String {
-        //println!("Job ID: {}. Title: {}. Pay: {}. Applied: {}",
-        //self.job_id, self.title, self.hourly, self.applied);
-        //format!("Job ID: {0}. Title: {1}. Pay: {2}. Applied: {3}",
         format!(
             "Title: {0}. Pay: {1}. Applied: {2}",
             //self.job_id, self.title, self.hourly, self.applied).to_string() // Return the String

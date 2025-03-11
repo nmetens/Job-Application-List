@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jobs List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+     <h2>Job List</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Job Title</th>
+            <th>Job Rate</th>
+            <th>Applied</th>
+            <th>Link</th>
+        </tr>
+
+        <!-- Job rows will be inserted here into the placeholder: -->
+        {% for job in jobs %} <!-- jobs is passed in from rust code. -->
+        <tr> <!-- The data for each job object is extracted and added to a table row: -->
+            <td>{{ job.id }}</td>
+            <td>{{ job.title }}</td>
+            <td>{{ job.hourly_rate }}</td>
+            <td>{{ job.applied }}</td>
+            <td><a href="{{ job.link }}">View Job</a></td>
+        </tr>
+        {% endfor %}
+    </table>   
+
+</body>
+</html>
