@@ -47,7 +47,7 @@ impl Applications {
     pub fn add_job(&mut self, id: u32, job_title: &str, job_rate: f32, applied: u32, link: String) {
         //self.jobs.push(Job::new(self.total_jobs, job_title.to_string(), job_rate as f32));
         self.jobs.push(Job::new(
-            id,
+            Some(id),
             job_title.to_string(),
             job_rate as f32,
             (applied as u32).to_string(),
@@ -62,13 +62,13 @@ impl Applications {
     }
 
     // Loop through jobs list and display each job:
-    pub fn _view_apps(&mut self) -> String {
+    /*pub fn _view_apps(&mut self) -> String {
         let mut data: String = "".to_string();
         for job in &self.jobs {
             data += &(job._display() + "\n");
         }
         data
-    }
+    }*/
 
     pub fn get_jobs(&self) -> Vec<Job> {
         self.jobs.clone()

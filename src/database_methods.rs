@@ -22,7 +22,7 @@ pub fn create_table(connection: &rusqlite::Connection) -> Result<(), rusqlite::E
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             job_title TEXT NOT NULL,
             hourly_rate REAL,
-            applied INTEGER NOT NULL CHECK (applied IN (0, 1))
+            applied INTEGER NOT NULL CHECK (applied IN (0, 1)),
             link TEXT
         )",
         (), // Empty parameters
@@ -78,7 +78,7 @@ pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite:
         let link: String = row.get::<_, String>(4).ok().unwrap_or("No Link".to_string());
 
         // Return a new Job instance with applied as "Yes"/"No" instead of "1/0":
-        Ok(Job::new(id, title, hourly, applied_status, Some(link)))
+        Ok(Job::new(Some(id), title, hourly, applied_status, Some(link)))
     })?;
 
     let mut jobs = Vec::new();

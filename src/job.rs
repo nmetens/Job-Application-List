@@ -32,7 +32,7 @@ use serde::{Serialize, Deserialize}; // Serialize trait to pass a job into tera 
 // Clone trait to make copied of a Job object, and Deserialize/Serialize for tera.
 #[derive(Clone, Serialize, Deserialize, Debug)] 
 pub struct Job {
-    id: u32,
+    id: Option<u32>,
     title: String,
     hourly: f32,
     applied: String,
@@ -42,7 +42,7 @@ pub struct Job {
 impl Job {
     // Constructor:
     //pub fn new(job_id: u32, title: String, hourly: f32) -> Self {
-    pub fn new(id: u32, title: String, hourly: f32, applied: String, link: Option<String>) -> Self {
+    pub fn new(id: Option<u32>, title: String, hourly: f32, applied: String, link: Option<String>) -> Self {
         Self {
             id,
             title,
@@ -52,25 +52,12 @@ impl Job {
         } // Return self
     }
 
-    // Display job info:
-    pub fn _display(&self) -> String {
-        format!(
-            "Title: {0}. Pay: {1}. Applied: {2}",
-            //self.job_id, self.title, self.hourly, self.applied).to_string() // Return the String
-            self.title,
-            self.hourly,
-            self.applied
-        )
-        .to_string() // Return the String
+    pub fn get_id(&self) -> u32 { 
+        self.id.clone().expect("Failed to create job id.")
     }
 
-    pub fn get_id(&self) -> u32 { self.id.clone() }
-
-    pub fn get_link(&self) -> String { self.link.clone().expect("No Link.") }
-
-    // Update application status:
-    pub fn _applied(&mut self, applied: String) {
-        self.applied = applied;
+    pub fn get_link(&self) -> String { 
+        self.link.clone().expect("No Link.")
     }
 
     pub fn get_title(&self) -> String {

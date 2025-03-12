@@ -46,6 +46,11 @@ case "$1" in
                 query "SELECT * FROM jobs WHERE applied = 0"
             fi    
 
+        elif [ "$2" == "drop" ]; then
+            echo "Dropping All Jobs in the Database..."
+            query "DROP TABLE IF EXISTS jobs"
+            echo ""
+
         else # Deafult, no sql command, just display all:
             echo "DEAFULT - Displaying Database:"
             sqlite3 jobs_data.db < display.sql
@@ -90,6 +95,7 @@ case "$1" in
         echo "  $0 sql total        # Display the total jobs in the table"
         echo "  $0 sql applied yes  # Display the total jobs in the table applied to"
         echo "  $0 sql applied no   # Display the total jobs in the table NOT applied to"
+        echo "  $0 sql drop         # Drop the jobs table in the database (Start Fresh Job Application)"
         echo "  $0 build            # Build the project"
         echo "  $0 run              # Run the project"
         echo ""
