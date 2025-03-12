@@ -13,46 +13,6 @@ use rusqlite::{Connection, Result};
 
 /** Main method where an application is created, then a table inside a database,
 where jobs are poppulated into tables and stored in the database. */
-/*fn main() -> Result<()> {
-    let mut apps = application::Applications::new();
-
-    // Job application database file:
-    let database_file: &str = "jobs_data.db";
-
-    // Create an SQLite database file. Open the database
-    // file if it already exists.
-    let connection = Connection::open(database_file)?;
-
-    let _ = database_methods::drop_table(&connection, "jobs"); // Remove the table each time for testing.
-
-    // Create a table:
-    if let Err(e) = database_methods::create_table(&connection) {
-        eprintln!("Error: {}", e);
-    }
-
-    // Read the data inside the csv file of jobs and
-    // save the jobs in the app object:
-    let csv_file: &str = "application.csv";
-    if let Err(e) = read_csv_file(csv_file, &mut apps) {
-        eprintln!("Error: {}", e);
-    }
-
-    // Enter the jobs in the application to the database:
-    for job in apps.get_jobs() {
-        if let Err(e) = database_methods::enter_data(&connection, &job) {
-            eprintln!("Error: {}", e);
-        }
-    }
-
-    if let Err(e) = database_methods::get_data(&connection) {
-        eprintln!("Error: {}", e);
-    }
-
-    Ok(())
-
-
-}*/
-
 // Logging used for the server side to 
 // see GET and POST requests:
 use log::{info, LevelFilter, error};
@@ -60,32 +20,58 @@ use env_logger::Builder;
 use std::env;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use std::io::Write;
-use crate::database_methods::get_jobs;
+use crate::database_methods::{get_jobs, enter_data};
 use tera::{Tera, Context};
 use actix_files::Files;
+
+use crate::job::Job;
 
 /// Log messages from the server side.
 fn log(message: &str) {
    info!("{}", message); 
 }
 
-async fn add_jobs(tera: web::Data<Tera>) -> impl Responder {
-    // Job application database file:
-    let database_file: &str = "jobs_data.db";
+async fn add_jobs(tera: web::Data<Tera>, form: Option<web::Form<Job>>) -> impl Responder {
 
-    // Create an SQLite database file. Open the database
-    // file if it already exists.
-    let connection = match Connection::open(database_file) {
-        Ok(conn) => conn,
-        Err(err) => {
-            eprintln!("Error opening the database: {}", err);
-            return HttpResponse::InternalServerError().body("Error opening the database.");
+    info!("Received job form: {:?}", form);
+    // If the form has been submitted, process the data (POST)
+    if let Some(job_form) = form {
+        // Open the SQLite database
+        let database_file = "jobs_data.db";
+        let connection = match Connection::open(database_file) {
+            Ok(conn) => conn,
+            Err(err) => {
+                eprintln!("Error opening the database: {}", err);
+                return HttpResponse::InternalServerError().body("Error opening the database.");
+            }
+        };
+
+        // Insert the new job into the database
+        let applied_int = match job_form.get_applied().as_str() {
+            "Yes" => 1,
+            "No" => 0,
+            _ => 0, // Default to "No" if somehow invalid value is sent
+        };
+
+        let result = enter_data(&connection, &job_form);
+
+        match result {
+            Ok(_) => {
+                // Redirect to the jobs list page after successful form submission
+                info!("Successful POST to database.");
+                return HttpResponse::Found().header("LOCATION", "/").finish();
+            },
+            Err(err) => {
+                eprintln!("Error inserting job into the database: {}", err);
+                return HttpResponse::InternalServerError().body("Error inserting job into the database.");
+            }
         }
-    };
+    }
 
-    log("Received request: GET /jobs");
-    let add_page = tera // Serve the home.html page that links to other routes:
-        .render("add.html", &Context::new())
+    info!("No POST");
+    // If no form has been submitted, render the "add.html" page
+    let add_page = tera
+        .render("add.html", &tera::Context::new())
         .unwrap_or_else(|_| "Error rendering template".to_string());
 
     HttpResponse::Ok().body(add_page)
@@ -164,9 +150,9 @@ async fn main() -> std::io::Result<()> {
             // to database of displays jobs in html:
             //.route("/jobs", web::get().to(|| async { HttpResponse::Ok().body(list_jobs) }))
             .app_data(web::Data::new(tera.clone())) // Add Tera to Actix app data.
-            .route("/", web::get().to(home))
-            .route("/jobs", web::get().to(list_jobs))
-            .route("/add", web::get().to(add_jobs))
+            .route("/", web::get().to(list_jobs))
+            .route("/add", web::post().to(add_jobs)) // Handle POST to submit the form
+            .route("/add", web::get().to(add_jobs)) // Handle the GET for the add_jobs
             .service(Files::new("/static", "./static").show_files_listing()) // Serve the static style.css files.
     })
     .bind(url)?

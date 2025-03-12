@@ -51,7 +51,7 @@ impl Applications {
             job_title.to_string(),
             job_rate as f32,
             (applied as u32).to_string(),
-            link.to_string()
+            Some(link.to_string())
         ));
         self.total_jobs += 1;
     }

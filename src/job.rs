@@ -27,21 +27,22 @@
 ///     link: None,
 /// };
 /// ```
-use serde::Serialize; // Serialize trait to pass a job into tera in main.
+use serde::{Serialize, Deserialize}; // Serialize trait to pass a job into tera in main.
 
-#[derive(Clone, Serialize)] // Clone trait to make copied of a Job object, and Serialize for tera.
+// Clone trait to make copied of a Job object, and Deserialize/Serialize for tera.
+#[derive(Clone, Serialize, Deserialize, Debug)] 
 pub struct Job {
     id: u32,
     title: String,
     hourly: f32,
     applied: String,
-    link: String,
+    link: Option<String>, // link is an optional field.
 }
 
 impl Job {
     // Constructor:
     //pub fn new(job_id: u32, title: String, hourly: f32) -> Self {
-    pub fn new(id: u32, title: String, hourly: f32, applied: String, link: String) -> Self {
+    pub fn new(id: u32, title: String, hourly: f32, applied: String, link: Option<String>) -> Self {
         Self {
             id,
             title,
@@ -65,7 +66,7 @@ impl Job {
 
     pub fn get_id(&self) -> u32 { self.id.clone() }
 
-    pub fn get_link(&self) -> String { self.link.clone() }
+    pub fn get_link(&self) -> String { self.link.clone().expect("No Link.") }
 
     // Update application status:
     pub fn _applied(&mut self, applied: String) {

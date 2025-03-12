@@ -11,6 +11,9 @@ run = "0.1.0"
 rusqlite = "0.33.0" # To use sql in rust:
 actix-web = "4" # Resource: https://actix.rs/docs/application
 
+# For the form in the database:
+actix-rt = "2"
+
 # For logging on the server-side:
 env_logger = "0.10"
 log = "0.4" 

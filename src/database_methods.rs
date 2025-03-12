@@ -21,8 +21,9 @@ pub fn create_table(connection: &rusqlite::Connection) -> Result<(), rusqlite::E
         "CREATE TABLE IF NOT EXISTS jobs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             job_title TEXT NOT NULL,
-            hourly_rate INTEGER,
+            hourly_rate REAL,
             applied INTEGER NOT NULL CHECK (applied IN (0, 1))
+            link TEXT
         )",
         (), // Empty parameters
     )?;
@@ -43,8 +44,8 @@ pub fn enter_data(
     a_job: &job::Job,
 ) -> Result<(), rusqlite::Error> {
     connection.execute(
-        "INSERT INTO jobs (job_title, hourly_rate, applied) VALUES (?1, ?2, ?3)",
-        rusqlite::params![a_job.get_title(), a_job.get_hourly(), a_job.get_applied()], // Proper parameter format
+        "INSERT INTO jobs (job_title, hourly_rate, applied, link) VALUES (?1, ?2, ?3, ?4)",
+        rusqlite::params![a_job.get_title(), a_job.get_hourly(), a_job.get_applied(), a_job.get_link()], // Proper parameter format
     )?;
     Ok(())
 }
@@ -77,7 +78,7 @@ pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite:
         let link: String = row.get::<_, String>(4).ok().unwrap_or("No Link".to_string());
 
         // Return a new Job instance with applied as "Yes"/"No" instead of "1/0":
-        Ok(Job::new(id, title, hourly, applied_status, link))
+        Ok(Job::new(id, title, hourly, applied_status, Some(link)))
     })?;
 
     let mut jobs = Vec::new();
