@@ -2,18 +2,10 @@
 // Class: Rust 523
 // Professor: Bart Massey
 
-mod application; // References application.rs file
 mod csv_reader;
 mod job; // References job.rs file
-mod list; // For saving list data to a file // For reading csv file
-use crate::csv_reader::read_csv_file;
 mod database_methods;
 
-use rusqlite::{Connection, Result};
-use rusqlite::types::Value;
-
-/** Main method where an application is created, then a table inside a database,
-where jobs are poppulated into tables and stored in the database. */
 // Logging used for the server side to 
 // see GET and POST requests:
 use log::{info, LevelFilter, error};
@@ -21,8 +13,9 @@ use env_logger::Builder;
 use std::env;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use std::io::Write;
+use rusqlite::{Connection};
 use crate::database_methods::{get_jobs, enter_data, create_table};
-use tera::{Tera, Context};
+use tera::{Tera};
 use actix_files::Files;
 
 use crate::job::Job;
@@ -45,7 +38,7 @@ async fn add_jobs_get(tera: web::Data<Tera>) -> impl Responder {
     HttpResponse::Ok().body(add_page)
 }
 
-async fn add_jobs_post(tera: web::Data<Tera>, form: web::Form<Job>) -> impl Responder {
+async fn add_jobs_post(form: web::Form<Job>) -> impl Responder {
 
     info!("Received job form: {:?}", form);
     // If the form has been submitted, process the data (POST)
@@ -66,21 +59,22 @@ async fn add_jobs_post(tera: web::Data<Tera>, form: web::Form<Job>) -> impl Resp
         _ => 0, // Default to "No" if somehow invalid value is sent
     };
 
-    let new_Job = Job::new( 
+    let new_job = Job::new( 
         None, // For autoincrement in database.
         form.get_title().clone(),
         form.get_hourly(),
         applied_int.to_string(),
         Some(form.get_link().clone())
     );
+    info!("Job Link: {:?}", new_job.get_link());
 
-    let result = enter_data(&connection, &new_Job);
+    let result = enter_data(&connection, &new_job);
 
     match result {
         Ok(_) => {
             // Redirect to the jobs list page after successful form submission
             info!("Successful POST to database.");
-            return HttpResponse::Found().header("LOCATION", "/").finish();
+            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
         },
         Err(err) => {
             eprintln!("Error inserting job into the database: {}", err);

@@ -7,9 +7,9 @@
 //! method. The method checks for headers, then loops through
 //! the file catpuring each line and unwraps their data.
 
-use crate::application;
 use csv::Reader;
 use std::error::Error;
+use crate::Job;
 
 /// Reads a csv file.
 ///
@@ -34,22 +34,19 @@ use std::error::Error;
 ///
 /// # Example
 /// ```
-/// let mut app = Applications {
-///     jobs: vec![],
-///     total_jobs: 0,
-/// };
+///jobs: vec![],
 ///
-/// match read_csv_file("application.csv", &mut app) {
+/// match read_csv_file("application.csv", &mut jobs) {
 ///     Ok(updated_app) => println!("CSV file loaded successfully!"),
 ///     Err(e) => eprintln!("Failed to read CSV: {}", e),
 /// }
 /// // Assumes that the application.csv file doesn't change: 
-/// assert_eq!(app.get(0).expect("ERROR").get_title(), "Bus Driver");
+/// assert_eq!(jobs.get(0).expect("ERROR").get_title(), "Bus Driver");
 /// ```
 pub fn read_csv_file<'a>(
     file: &'a str,
-    app: &'a mut application::Applications,
-) -> Result<&'a application::Applications, Box<dyn Error>> {
+    jobs: &'a mut Vec<Job>,
+) -> Result<&'a Vec<Job>, Box<dyn Error>> {
     let mut csv_reader = Reader::from_path(file)?;
 
     for job in csv_reader.records() {
@@ -59,23 +56,25 @@ pub fn read_csv_file<'a>(
                     .get(3)
                     .and_then(|s| s.parse::<u32>().ok())
                     .unwrap_or(0); // Default to 0 (false) if None or parsing fails.
-                let job_title = record.get(1).unwrap_or("N/A");
+                let job_title = record.get(1).expect("Failed to read title").to_string();
                 let hourly_rate: f32 = record
                     .get(2)
                     .and_then(|s| s.parse::<f32>().ok()) // Parse if Some, return None if parse fails.
                     .unwrap_or(0.0); // Default to 0.0 if None or parsing fails.
-                let applied: u32 = record
+                let applied: String = record
                     .get(3)
-                    .and_then(|s| s.parse::<u32>().ok())
-                    .unwrap_or(0); // Default to 0 (false) if None or parsing fails.
+                    .and_then(|s| s.parse::<u32>().ok()) // Try to parse as u32
+                    .map(|n| n.to_string()) // Convert u32 to String
+                    .unwrap_or_else(|| "0".to_string()); // Default to "0" if parsing fails
                 let link: String = record.get(4).unwrap_or("N/A").to_string();
 
-                app.add_job(job_id, job_title, hourly_rate, applied, link); // Add the job to the application.
+                let new_job = Job::new(Some(job_id), job_title, hourly_rate, applied, Some(link));
+                jobs.push(new_job); // Add the job to the application.
             }
             Err(e) => eprintln!("Error reading job file: {}", e),
         }
     }
-    Ok(app)
+    Ok(jobs)
 }
 
 #[cfg(test)]

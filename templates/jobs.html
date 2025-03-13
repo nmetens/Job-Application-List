@@ -24,7 +24,11 @@
             <td>{{ job.title }}</td>
             <td>{{ job.hourly }}</td>
             <td>{{ job.applied }}</td>
-            <td><a href="{{ job.link }}" target="_blank">View Job</a></td>
+            {% if job.link and job.link != "No Link" %}
+                <td><a href="{{ job.link }}" target="_blank">Link to Application</a></td>
+            {% else %}
+              <span>No link</span>
+            {% endif %}
         </tr>
         {% endfor %}
     </table>   

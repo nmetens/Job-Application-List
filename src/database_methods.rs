@@ -62,7 +62,7 @@ use log::info;
 use crate::job::Job;
 pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite::Error> {
     let mut statement =
-        connection.prepare("SELECT id, job_title, hourly_rate, applied FROM jobs")?;
+        connection.prepare("SELECT id, job_title, hourly_rate, applied, link FROM jobs")?;
 
     // Iterate through the database and gather all the lines of data, creating the Job:
     let job_iterator = statement.query_map([], |row| {
@@ -75,10 +75,11 @@ pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite:
         let applied_status = if applied == 1 { "Yes".to_string() } else { "No".to_string() };
 
         // link
-        let link: String = row.get::<_, String>(4).ok().unwrap_or("No Link".to_string());
+        //let link: String = row.get::<_, String>(4).ok().unwrap_or("No Link".to_string());
+        let link = row.get::<_, String>(4).map(|s| s.to_string());
 
         // Return a new Job instance with applied as "Yes"/"No" instead of "1/0":
-        Ok(Job::new(Some(id), title, hourly, applied_status, Some(link)))
+        Ok(Job::new(Some(id), title, hourly, applied_status, Some(link.expect("No Link"))))
     })?;
 
     let mut jobs = Vec::new();
