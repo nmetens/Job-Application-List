@@ -32,7 +32,7 @@ use serde::{Serialize, Deserialize}; // Serialize trait to pass a job into tera 
 // Clone trait to make copied of a Job object, and Deserialize/Serialize for tera.
 #[derive(Clone, Serialize, Deserialize, Debug)] 
 pub struct Job {
-    id: Option<u32>,
+    id: Option<i64>,
     title: String,
     hourly: f32,
     applied: String,
@@ -43,13 +43,13 @@ pub struct Job {
 // help remove a job from the database:
 #[derive(serde::Deserialize)]
 pub struct JobRemovalForm {
-    pub id: u32,
+    pub id: i64,
 }
 
 impl Job {
     // Constructor:
-    //pub fn new(job_id: u32, title: String, hourly: f32) -> Self {
-    pub fn new(id: Option<u32>, title: String, hourly: f32, applied: String, link: Option<String>) -> Self {
+    //pub fn new(job_id: i64, title: String, hourly: f32) -> Self {
+    pub fn new(id: Option<i64>, title: String, hourly: f32, applied: String, link: Option<String>) -> Self {
         Self {
             id,
             title,
@@ -59,7 +59,7 @@ impl Job {
         } // Return self
     }
 
-    pub fn get_id(&self) -> u32 { 
+    pub fn get_id(&self) -> i64 { 
         self.id.clone().expect("Failed to create job id.")
     }
 

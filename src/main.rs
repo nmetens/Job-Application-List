@@ -21,11 +21,6 @@ use actix_files::Files;
 
 use crate::job::Job;
 
-/// Log messages from the server side.
-fn log(message: &str) {
-   info!("{}", message); 
-}
-
 async fn rem_job(form: web::Form<JobRemovalForm>, tera: web::Data<Tera>) -> impl Responder {
 
     let database_file = "jobs_data.db";
@@ -54,21 +49,21 @@ async fn rem_job(form: web::Form<JobRemovalForm>, tera: web::Data<Tera>) -> impl
             context.insert("success", &true);
             // Redirect to the jobs list page after successful form submission:
             info!("Successful DELETE in database.");
-            HttpResponse::Ok().body(page) // Stay on the current page
+            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
         },
 
         Ok(false) => {
             context.insert("message", &format!("No job found with ID {}.", job_id));
             context.insert("success", &false);
             info!("No job with id {} found in the database.", job_id);
-            HttpResponse::Ok().body(page) // Stay on the current page:
+            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
         },
 
         Err(_) => {
             context.insert("message", "Failed to delete job.");
             context.insert("success", &false);
             eprintln!("Error removing the job from the database.");
-            HttpResponse::Ok().body(page) // Stay on the current page
+            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
         }
     }
 }
@@ -132,7 +127,7 @@ async fn list_jobs(tera: web::Data<Tera>) -> impl Responder {
         }
     };
 
-    log("Received request: GET /jobs");
+    info!("Received request: GET /jobs");
     match get_jobs(&connection) {
         Ok(jobs) => {
             let mut context = tera::Context::new();
@@ -191,7 +186,7 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     // Only log my messages, no verbose internal actix logs:
-    log(&("Server listening on \"".to_owned() + url + "\""));
+    info!("Server listening on \"{}", url);
 
     // Initialize Tera template engine where the html files are located:
     let tera = Tera::new("templates/**/*").unwrap();
@@ -203,8 +198,8 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(tera.clone())) // Add Tera to Actix app data.
             .service(Files::new("/static", "./static").show_files_listing()) // Serve the static style.css files.
             .route("/", web::get().to(list_jobs))
-            .route("/", web::post().to(add_job))
-            .route("/", web::post().to(rem_job))
+            .route("/add", web::post().to(add_job)) // POST for adding jobs.
+            .route("/rem", web::post().to(rem_job)) // POST for removing jobs.
     });
 
     // Fix: Properly handle the `.bind()` result

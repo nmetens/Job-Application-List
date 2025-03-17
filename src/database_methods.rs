@@ -55,7 +55,7 @@ pub fn enter_data(
 /// # Arguments
 /// * `connection` - Reference to the databse.
 /// * `id` - The jobs id to be removed.
-pub fn remove_data(connection: &rusqlite::Connection, id: u32) -> Result<bool, rusqlite::Error> {
+pub fn remove_data(connection: &rusqlite::Connection, id: i64) -> Result<bool, rusqlite::Error> {
     let result = connection.execute("DELETE FROM jobs WHERE id = ?", rusqlite::params![id])?;
 
     if result > 0 {
@@ -81,12 +81,12 @@ pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite:
 
     // Iterate through the database and gather all the lines of data, creating the Job:
     let job_iterator = statement.query_map([], |row| {
-        let id: u32 = row.get::<_, u32>(0)?;            // id
+        let id: i64 = row.get::<_, i64>(0)?;            // id
         let title: String = row.get::<_, String>(1)?;   // title
         let hourly: f32 = row.get::<_, f32>(2)?;        // hourly
 
         // Properly handle the Result and convert applied value to "Yes" or "No"
-        let applied: u32 = row.get::<_, u32>(3)?;       // applied
+        let applied: i64 = row.get::<_, i64>(3)?;       // applied
         let applied_status = if applied == 1 { "Yes".to_string() } else { "No".to_string() };
 
         // link

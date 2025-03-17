@@ -27,3 +27,6 @@ SELECT * FROM jobs WHERE hourly_rate > 20;
 
 /* Sort the jobs by hourly rate from highest to lowest: */
 SELECT * FROM jobs ORDER BY hourly_rate DESC;
+
+/* Create and index for the title: */
+CREATE INDEX IF NOT EXISTS idx_job_title ON jobs(job_title)

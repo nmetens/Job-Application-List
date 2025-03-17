@@ -52,9 +52,9 @@ pub fn read_csv_file<'a>(
     for job in csv_reader.records() {
         match job {
             Ok(record) => {
-                let job_id: u32 = record
+                let job_id: i64 = record
                     .get(3)
-                    .and_then(|s| s.parse::<u32>().ok())
+                    .and_then(|s| s.parse::<i64>().ok())
                     .unwrap_or(0); // Default to 0 (false) if None or parsing fails.
                 let job_title = record.get(1).expect("Failed to read title").to_string();
                 let hourly_rate: f32 = record
@@ -63,8 +63,8 @@ pub fn read_csv_file<'a>(
                     .unwrap_or(0.0); // Default to 0.0 if None or parsing fails.
                 let applied: String = record
                     .get(3)
-                    .and_then(|s| s.parse::<u32>().ok()) // Try to parse as u32
-                    .map(|n| n.to_string()) // Convert u32 to String
+                    .and_then(|s| s.parse::<i64>().ok()) // Try to parse as i64
+                    .map(|n| n.to_string()) // Convert i64 to String
                     .unwrap_or_else(|| "0".to_string()); // Default to "0" if parsing fails
                 let link: String = record.get(4).unwrap_or("N/A").to_string();
 
