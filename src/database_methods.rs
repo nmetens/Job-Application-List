@@ -50,6 +50,19 @@ pub fn enter_data(
     Ok(())
 }
 
+/// Remove a job from the `jobs` table.
+///
+/// # Arguments
+/// * `connection` - Reference to the databse.
+/// * `id` - The jobs id to be removed.
+pub fn remove_data(connection: &rusqlite::Connection, id: u32) -> Result<(), rusqlite::Error> {
+    connection.execute(
+        "DELETE FROM jobs WHERE id = (?1)",
+        rusqlite::params![id],
+    )?;
+    Ok(())
+}
+
 /// Retrieves all job records from the `jobs` table and prints them.
 ///
 /// # Arguments

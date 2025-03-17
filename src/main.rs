@@ -25,6 +25,22 @@ fn log(message: &str) {
    info!("{}", message); 
 }
 
+async fn rem_jobs_get(tera: web::Data<Tera>) -> impl Responder {
+    info!("Rendering removal form...");
+
+    // Show the html for removing a job from the app:
+    let rem_page = tera
+    .render("rem.html", &tera::Context::new())
+    .unwrap_or_else(|_| "Error renfering template".to_string());
+
+    HttpResponse::Ok().body(rem_page)
+}
+
+/*async fn rem_jobs_post(form: web::Form<Job>) -> impl Responder {
+
+
+    HttpResponse::Ok().body();
+}*/
 
 async fn add_jobs_get(tera: web::Data<Tera>) -> impl Responder {
 
@@ -169,6 +185,8 @@ async fn main() -> std::io::Result<()> {
             .route("/", web::get().to(list_jobs))
             .route("/add", web::get().to(add_jobs_get))  // Handle GET for the form
             .route("/add", web::post().to(add_jobs_post)) // Handle POST to submit the form
+            .route("/rem", web::get().to(rem_jobs_get))
+            //.route("/remove", web::post().to(rem_jobs_post))
             .service(Files::new("/static", "./static").show_files_listing()) // Serve the static style.css files.
     });
 

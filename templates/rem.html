@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Site</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h2>Remove a job from the Application</h2>
+
+    <form action="/remove_job" method="post">
+        <label for="job_id">Enter Job ID to Remove:</label>
+        <input type="number" id="job_id" name="job_id" required>
+        <button type="submit">Remove Job</button>
+    </form>
+
+    <a href="/">Back to Home</a>
+</body>
+</html>
