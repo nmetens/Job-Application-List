@@ -5,141 +5,105 @@
     box-sizing: border-box;
 }
 
-/* Body styles */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f7f6;
-    color: #333;
-    padding: 20px;
+.applied-status {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
 }
 
-/* Heading styles */
-h1 {
-    text-align: center;
+/* Set the body to center everything */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
     color: #333;
+    display: flex;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
+    text-align: center;
+}
+
+/* Title styling */
+h1 {
     margin-bottom: 20px;
 }
 
-/* Job List Table */
+/* Table styling */
 table {
-    width: 100%;
-    margin-top: 20px;
+    width: 80%;
+    max-width: 900px;
     border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 th, td {
     padding: 12px;
-    text-align: center;
-    border: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
 }
 
 th {
-    background-color: #4CAF50;
-    color: white;
-}
-
-tr:nth-child(even) {
     background-color: #f2f2f2;
 }
 
-tr:hover {
-    background-color: #ddd;
-}
-
-/* Links styling */
-a {
-    text-decoration: none;
-    color: #4CAF50;
-    font-weight: bold;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* Button Styling */
 button {
-    background-color: #4CAF50;
+    background-color: #007BFF;
     color: white;
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 10px 15px;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
+    margin: 10px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #0056b3;
 }
 
-/* Form container styling */
+/* Form styling */
 form {
-    display: flex;
-    flex-direction: column;
-    margin-top: 20px;
-    padding: 15px;
     background-color: #fff;
+    padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 300px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-form label {
-    font-size: 16px;
-    margin-bottom: 8px;
-    color: #333;
-}
-
-form input {
-    padding: 10px;
-    font-size: 16px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-form input:focus {
-    border-color: #4CAF50;
-    outline: none;
-}
-
-/* Message styling */
-p.message {
-    font-size: 16px;
-    color: green;
-    margin-top: 15px;
-    text-align: center;
-}
-
-p.error {
-    font-size: 16px;
-    color: red;
-    margin-top: 15px;
-    text-align: center;
-}
-
-/* Container for the "Add Job" and "Remove Job" buttons */
-button-container {
-    display: flex;
-    justify-content: center;
     margin-top: 20px;
 }
 
-button-container a {
-    margin: 0 10px;
-    font-size: 18px;
-    background-color: #f4f7f6;
-    color: #333;
-    padding: 10px 20px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+form input, form select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
-button-container a:hover {
-    background-color: #4CAF50;
+form button {
+    background-color: #007BFF;
     color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+/* Styling for error messages */
+p {
+    color: #e74c3c;
+    font-size: 0.9rem;
+}
+
+#addJobBtn, #removeJobBtn {
+    width: 150px;
+}
+
+#addJobForm, #removeJobForm {
+    margin-top: 20px;
 }
 

@@ -43,7 +43,7 @@ use crate::Job;
 /// // Assumes that the application.csv file doesn't change: 
 /// assert_eq!(jobs.get(0).expect("ERROR").get_title(), "Bus Driver");
 /// ```
-pub fn read_csv_file<'a>(
+pub fn _read_csv_file<'a>(
     file: &'a str,
     jobs: &'a mut Vec<Job>,
 ) -> Result<&'a Vec<Job>, Box<dyn Error>> {
@@ -61,11 +61,11 @@ pub fn read_csv_file<'a>(
                     .get(2)
                     .and_then(|s| s.parse::<f32>().ok()) // Parse if Some, return None if parse fails.
                     .unwrap_or(0.0); // Default to 0.0 if None or parsing fails.
-                let applied: String = record
+                let applied: bool = record
                     .get(3)
                     .and_then(|s| s.parse::<i64>().ok()) // Try to parse as i64
-                    .map(|n| n.to_string()) // Convert i64 to String
-                    .unwrap_or_else(|| "0".to_string()); // Default to "0" if parsing fails
+                    .map(|n| n == 1) // Convert i64 (1 or 0) to bool (true or false)
+                    .unwrap_or(false); // Default to false if parsing fails
                 let link: String = record.get(4).unwrap_or("N/A").to_string();
 
                 let new_job = Job::new(Some(job_id), job_title, hourly_rate, applied, Some(link));

@@ -35,7 +35,7 @@ pub struct Job {
     id: Option<i64>,
     title: String,
     hourly: f32,
-    applied: String,
+    applied: bool,
     link: Option<String>, // link is an optional field.
 }
 
@@ -46,10 +46,17 @@ pub struct JobRemovalForm {
     pub id: i64,
 }
 
+// Define the structure to accept the job ID and new status
+#[derive(serde::Deserialize)]
+pub struct JobStatusUpdate {
+    pub id: i64,
+    pub applied: bool,
+}
+
 impl Job {
     // Constructor:
     //pub fn new(job_id: i64, title: String, hourly: f32) -> Self {
-    pub fn new(id: Option<i64>, title: String, hourly: f32, applied: String, link: Option<String>) -> Self {
+    pub fn new(id: Option<i64>, title: String, hourly: f32, applied: bool, link: Option<String>) -> Self {
         Self {
             id,
             title,
@@ -59,7 +66,7 @@ impl Job {
         } // Return self
     }
 
-    pub fn get_id(&self) -> i64 { 
+    pub fn _get_id(&self) -> i64 { 
         self.id.clone().expect("Failed to create job id.")
     }
 
@@ -75,7 +82,7 @@ impl Job {
         self.hourly.clone()
     }
 
-    pub fn get_applied(&self) -> String {
+    pub fn get_applied(&self) -> bool {
         self.applied.clone()
     }
 }

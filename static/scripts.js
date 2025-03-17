@@ -17,4 +17,27 @@ $(document).ready(function() {
         $('#removeJobForm').toggle();
     });
 });
+function toggleAppliedStatus(element) {
+    const jobId = element.dataset.jobId;
+    const currentStatus = element.innerText.trim(); // Trim to avoid whitespace issues
+    const newStatus = currentStatus === "Yes" ? "No" : "Yes"; // Toggle between Yes/No
+
+    fetch("/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: parseInt(jobId), applied: newStatus === "Yes" }) // Send boolean
+    })
+    .then(response => response.json()) // ✅ Ensure response is parsed as JSON
+    .then(data => {
+        if (data.success) {
+            element.innerText = newStatus; // ✅ Update UI immediately
+        } else {
+            alert("Failed to update status."); // ❌ This means server returned `success: false`
+        }
+    })
+    .catch(error => {
+        console.error("Error updating applied status:", error);
+        alert("Failed to update status.");
+    });
+}
 

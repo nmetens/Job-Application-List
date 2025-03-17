@@ -86,8 +86,8 @@ pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite:
         let hourly: f32 = row.get::<_, f32>(2)?;        // hourly
 
         // Properly handle the Result and convert applied value to "Yes" or "No"
-        let applied: i64 = row.get::<_, i64>(3)?;       // applied
-        let applied_status = if applied == 1 { "Yes".to_string() } else { "No".to_string() };
+        let applied_status: bool = row.get::<_, i64>(3)? == 1; // Convert 1/0 to true/false
+        //let applied_status = if applied == 1 { "Yes".to_string() } else { "No".to_string() };
 
         // link
         //let link: String = row.get::<_, String>(4).ok().unwrap_or("No Link".to_string());
@@ -118,12 +118,17 @@ pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite:
 /// # Returns
 /// * `Ok(())` if query exists on success.
 /// * `Err(rusqlite::Error)` if an error occurs.
-pub fn drop_table(
+pub fn _drop_table(
     connection: &rusqlite::Connection,
     table_name: &str,
 ) -> Result<(), rusqlite::Error> {
     let query = format!("DROP TABLE IF EXISTS {}", table_name);
     connection.execute(&query, [])?;
     println!("Table '{}' has been dropped.", table_name);
+    Ok(())
+}
+
+pub fn update_applied(connection: &rusqlite::Connection, new_status: bool, job_id: i64) -> rusqlite::Result<()> {
+    connection.execute("UPDATE jobs SET applied = ? WHERE id = ?", (new_status as i32, job_id))?;
     Ok(())
 }

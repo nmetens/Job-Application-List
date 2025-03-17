@@ -24,12 +24,12 @@
         <tr> <!-- The data for each job object is extracted and added to a table row: -->
             <td>{{ job.id }}</td>
             <td>{{ job.title }}</td>
-            <td>{{ job.hourly }}</td>
-            <td>{{ job.applied }}</td>
+            <td>${{ job.hourly }}</td>
+            <td><span class="applied-status" data-job-id="{{ job.id }}" onclick="toggleAppliedStatus(this)">{{ job.applied }}</span></td>
             {% if job.link and job.link != "No Link" %}
-                <td><a href="{{ job.link }}" target="_blank">Link to Application</a></td>
+                <td><a href="{{ job.link }}" target="_blank">Link to Job</a></td>
             {% else %}
-              <span>No link</span>
+              <td>No link</td>
             {% endif %}
         </tr>
         {% endfor %}
@@ -38,8 +38,9 @@
     <button id="addJobBtn">Add a Job</button>
     <button id="removeJobBtn">Remove a Job</button>
 
-    <!-- Placeholder for dynamically loaded forms -->
+    <!-- Placeholder for dynamically loaded "add job" form -->
     <div id="addJobForm" style="display:none;">
+        <h2>Add a Job</h2>
         <form action="/add" method="POST">
             <label for="title">Job Title</label>
             <input type="text" id="title" name="title" required><br><br>
@@ -60,6 +61,7 @@
         </form>
     </div>
 
+    <!-- Placeholder for the remove job form -->
     <div id="removeJobForm" style="display:none;">
         {% if message %}
             <p style="color: {% if success %}green{% else %}red{% endif %};">

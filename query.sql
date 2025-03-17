@@ -1,6 +1,21 @@
 .headers on
 .mode column
 
+/* Create the jobs table: */
+CREATE TABLE IF NOT EXISTS jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_title TEXT NOT NULL,
+            hourly_rate REAL,
+            applied INTEGER NOT NULL CHECK (applied IN (0, 1)),
+            link TEXT
+        )
+
+/* Insert into the jobs table: */
+INSERT INTO jobs (job_title, hourly_rate, applied, link) VALUES ('Tutor', 17, 1, NULL)
+
+/* Drop the table: */
+DROP TABLE IF EXISTS jobs 
+
 /* Insert a new job into the jobs table in the database: */
 INSERT INTO jobs (job_title, hourly_rate, applied) VALUES ('Software Engineer', 60, 1);
 
@@ -30,3 +45,4 @@ SELECT * FROM jobs ORDER BY hourly_rate DESC;
 
 /* Create and index for the title: */
 CREATE INDEX IF NOT EXISTS idx_job_title ON jobs(job_title)
+
