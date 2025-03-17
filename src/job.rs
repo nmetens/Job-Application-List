@@ -39,6 +39,13 @@ pub struct Job {
     link: Option<String>, // link is an optional field.
 }
 
+// Struct with only the id. Its purpose is to 
+// help remove a job from the database:
+#[derive(serde::Deserialize)]
+pub struct JobRemovalForm {
+    pub id: u32,
+}
+
 impl Job {
     // Constructor:
     //pub fn new(job_id: u32, title: String, hourly: f32) -> Self {

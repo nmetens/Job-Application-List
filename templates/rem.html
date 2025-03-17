@@ -9,9 +9,16 @@
 <body>
     <h2>Remove a job from the Application</h2>
 
-    <form action="/remove_job" method="post">
-        <label for="job_id">Enter Job ID to Remove:</label>
-        <input type="number" id="job_id" name="job_id" required>
+    <!-- Display a message if available -->
+    {% if message %}
+        <p style="color: {% if success %}green{% else %}red{% endif %};">
+            {{ message }}
+        </p>
+    {% endif %}
+
+    <form action="/rem" method="POST">
+        <label for="id">Enter Job ID to Remove:</label>
+        <input type="number" id="id" name="id" required>
         <button type="submit">Remove Job</button>
     </form>
 

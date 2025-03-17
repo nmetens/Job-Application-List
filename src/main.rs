@@ -14,8 +14,9 @@ use std::env;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use std::io::Write;
 use rusqlite::{Connection};
-use crate::database_methods::{get_jobs, enter_data, create_table};
-use tera::{Tera};
+use crate::database_methods::{get_jobs, enter_data, create_table, remove_data};
+use crate::job::JobRemovalForm;
+use tera::{Tera, Context};
 use actix_files::Files;
 
 use crate::job::Job;
@@ -36,11 +37,47 @@ async fn rem_jobs_get(tera: web::Data<Tera>) -> impl Responder {
     HttpResponse::Ok().body(rem_page)
 }
 
-/*async fn rem_jobs_post(form: web::Form<Job>) -> impl Responder {
+async fn rem_jobs_post(form: web::Form<JobRemovalForm>) -> impl Responder {
 
+    let database_file = "jobs_data.db";
 
-    HttpResponse::Ok().body();
-}*/
+    let connection = match Connection::open(database_file) {
+        Ok(conn) => conn,
+
+        Err(err) => {
+            eprintln!("Error opening the database: {}", err);
+            return HttpResponse::InternalServerError().body("Error opening the database.");
+        }
+    };
+
+    let job_id = form.id;
+    let mut context = Context::new();
+
+    // Call remove method with the connection and the id captured from the html form:
+    match remove_data(&connection, job_id) {
+        Ok(true) => {
+            context.insert("message", &format!("Job with ID {} successfully deleted.", job_id));
+            context.insert("success", &true);
+            // Redirect to the jobs list page after successful form submission:
+            info!("Successful DELETE in database.");
+            HttpResponse::Found().append_header(("LOCATION", "/")).finish() // Back to homepage.
+        },
+
+        Ok(false) => {
+            context.insert("message", &format!("No job found with ID {}.", job_id));
+            context.insert("success", &false);
+            info!("No job with id {} found in the database.", job_id);
+            HttpResponse::Found().append_header(("LOCATION", "/")).finish() // Back to homepage.
+        },
+
+        Err(_) => {
+            context.insert("message", "Failed to delete job.");
+            context.insert("success", &false);
+            eprintln!("Error removing the job from the database.");
+            HttpResponse::InternalServerError().body("Error removing job from database.")
+        }
+    }
+}
 
 async fn add_jobs_get(tera: web::Data<Tera>) -> impl Responder {
 
@@ -186,7 +223,7 @@ async fn main() -> std::io::Result<()> {
             .route("/add", web::get().to(add_jobs_get))  // Handle GET for the form
             .route("/add", web::post().to(add_jobs_post)) // Handle POST to submit the form
             .route("/rem", web::get().to(rem_jobs_get))
-            //.route("/remove", web::post().to(rem_jobs_post))
+            .route("/rem", web::post().to(rem_jobs_post))
             .service(Files::new("/static", "./static").show_files_listing()) // Serve the static style.css files.
     });
 

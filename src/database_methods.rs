@@ -55,12 +55,14 @@ pub fn enter_data(
 /// # Arguments
 /// * `connection` - Reference to the databse.
 /// * `id` - The jobs id to be removed.
-pub fn remove_data(connection: &rusqlite::Connection, id: u32) -> Result<(), rusqlite::Error> {
-    connection.execute(
-        "DELETE FROM jobs WHERE id = (?1)",
-        rusqlite::params![id],
-    )?;
-    Ok(())
+pub fn remove_data(connection: &rusqlite::Connection, id: u32) -> Result<bool, rusqlite::Error> {
+    let result = connection.execute("DELETE FROM jobs WHERE id = ?", rusqlite::params![id])?;
+
+    if result > 0 {
+        Ok(true) // Job was deleted
+    } else {
+        Ok(false) // No job found with that ID.
+    }
 }
 
 /// Retrieves all job records from the `jobs` table and prints them.
