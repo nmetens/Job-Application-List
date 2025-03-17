@@ -63,6 +63,7 @@ async fn rem_job(form: web::Form<JobRemovalForm>) -> impl Responder {
     }
 }
 
+
 async fn add_job(form: web::Form<Job>) -> impl Responder {
 
     info!("Received job form: {:?}", form);
@@ -78,10 +79,9 @@ async fn add_job(form: web::Form<Job>) -> impl Responder {
     };
 
     // Insert the new job into the database
-    let applied = match form.get_applied() {
-        true => true,
-        false => false,
-        _ => false, // Default to "No" if somehow invalid value is sent
+    let applied = match form.get_applied().as_str() {
+        "Yes" => true,
+        _ => false, // All other (No or other).
     };
 
     let new_job = Job::new( 
@@ -173,18 +173,6 @@ async fn update(form: web::Json<JobStatusUpdate>) -> impl Responder {
             HttpResponse::InternalServerError().json(ApiResponse { success: false })
         }
     }
-
-    /*match result {
-        Ok(_) => {
-            // Redirect to the jobs list page after successful form submission
-            info!("Successful Update of Application status in database.");
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
-        },
-        Err(err) => {
-            eprintln!("Error updating application status of job into the database: {}", err);
-            HttpResponse::InternalServerError().body("Error updating job in the database.")
-        }
-    }*/
 }
 
 #[actix_web::main]

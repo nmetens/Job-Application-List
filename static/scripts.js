@@ -17,27 +17,60 @@ $(document).ready(function() {
         $('#removeJobForm').toggle();
     });
 });
+
 function toggleAppliedStatus(element) {
     const jobId = element.dataset.jobId;
-    const currentStatus = element.innerText.trim(); // Trim to avoid whitespace issues
+    const currentStatus = element.textContent.trim(); // Get current text (Yes/No)
     const newStatus = currentStatus === "Yes" ? "No" : "Yes"; // Toggle between Yes/No
 
+    // Update the UI immediately
+    element.textContent = newStatus;
+
+    // Get the parent row and change the color based on the status
+    const row = element.closest('tr');
+    if (newStatus === "Yes") {
+        row.classList.add('highlight-green');
+        row.classList.remove('highlight-red');
+    } else {
+        row.classList.add('highlight-red');
+        row.classList.remove('highlight-green');
+    }
+
+    // Send an AJAX request to update the database
     fetch("/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: parseInt(jobId), applied: newStatus === "Yes" }) // Send boolean
     })
-    .then(response => response.json()) // ✅ Ensure response is parsed as JSON
+    .then(response => response.json()) // Ensure response is parsed as JSON
     .then(data => {
         if (data.success) {
-            element.innerText = newStatus; // ✅ Update UI immediately
+            console.log("Status updated successfully on the server.");
         } else {
-            alert("Failed to update status."); // ❌ This means server returned `success: false`
+            alert("Failed to update status.");
+            element.textContent = currentStatus; // Revert if the update fails
+            // Revert row color if needed
+            if (currentStatus === "Yes") {
+                row.classList.add('highlight-green');
+                row.classList.remove('highlight-red');
+            } else {
+                row.classList.add('highlight-red');
+                row.classList.remove('highlight-green');
+            }
         }
     })
     .catch(error => {
         console.error("Error updating applied status:", error);
         alert("Failed to update status.");
+        element.textContent = currentStatus; // Revert if there's an error
+        // Revert row color if needed
+        if (currentStatus === "Yes") {
+            row.classList.add('highlight-green');
+            row.classList.remove('highlight-red');
+        } else {
+            row.classList.add('highlight-red');
+            row.classList.remove('highlight-green');
+        }
     });
 }
 

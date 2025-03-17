@@ -82,8 +82,8 @@ impl Job {
         self.hourly.clone()
     }
 
-    pub fn get_applied(&self) -> bool {
-        self.applied.clone()
+    pub fn get_applied(&self) -> String {
+        if self.applied { "Yes".to_string() } else { "No".to_string() }
     }
 }
 
