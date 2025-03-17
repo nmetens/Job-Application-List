@@ -26,18 +26,7 @@ fn log(message: &str) {
    info!("{}", message); 
 }
 
-async fn rem_jobs_get(tera: web::Data<Tera>) -> impl Responder {
-    info!("Rendering removal form...");
-
-    // Show the html for removing a job from the app:
-    let rem_page = tera
-    .render("rem.html", &tera::Context::new())
-    .unwrap_or_else(|_| "Error renfering template".to_string());
-
-    HttpResponse::Ok().body(rem_page)
-}
-
-async fn rem_jobs_post(form: web::Form<JobRemovalForm>) -> impl Responder {
+async fn rem_job(form: web::Form<JobRemovalForm>, tera: web::Data<Tera>) -> impl Responder {
 
     let database_file = "jobs_data.db";
 
@@ -53,6 +42,11 @@ async fn rem_jobs_post(form: web::Form<JobRemovalForm>) -> impl Responder {
     let job_id = form.id;
     let mut context = Context::new();
 
+    // Render the remove page again with error message:
+    let page = tera
+        .render("home.html", &context)
+        .unwrap_or_else(|_| "Error rendering template".to_string());
+
     // Call remove method with the connection and the id captured from the html form:
     match remove_data(&connection, job_id) {
         Ok(true) => {
@@ -60,38 +54,26 @@ async fn rem_jobs_post(form: web::Form<JobRemovalForm>) -> impl Responder {
             context.insert("success", &true);
             // Redirect to the jobs list page after successful form submission:
             info!("Successful DELETE in database.");
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish() // Back to homepage.
+            HttpResponse::Ok().body(page) // Stay on the current page
         },
 
         Ok(false) => {
             context.insert("message", &format!("No job found with ID {}.", job_id));
             context.insert("success", &false);
             info!("No job with id {} found in the database.", job_id);
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish() // Back to homepage.
+            HttpResponse::Ok().body(page) // Stay on the current page:
         },
 
         Err(_) => {
             context.insert("message", "Failed to delete job.");
             context.insert("success", &false);
             eprintln!("Error removing the job from the database.");
-            HttpResponse::InternalServerError().body("Error removing job from database.")
+            HttpResponse::Ok().body(page) // Stay on the current page
         }
     }
 }
 
-async fn add_jobs_get(tera: web::Data<Tera>) -> impl Responder {
-
-    info!("Rendering job submission form...");
-
-    // If no form has been submitted, render the "add.html" page
-    let add_page = tera
-        .render("add.html", &tera::Context::new())
-        .unwrap_or_else(|_| "Error rendering template".to_string());
-
-    HttpResponse::Ok().body(add_page)
-}
-
-async fn add_jobs_post(form: web::Form<Job>) -> impl Responder {
+async fn add_job(form: web::Form<Job>) -> impl Responder {
 
     info!("Received job form: {:?}", form);
     // If the form has been submitted, process the data (POST)
@@ -219,12 +201,10 @@ async fn main() -> std::io::Result<()> {
             // When url: http://localhost:8000/jobs, call list_jobs() method that connects.
             // to database of displays jobs in html:
             .app_data(web::Data::new(tera.clone())) // Add Tera to Actix app data.
-            .route("/", web::get().to(list_jobs))
-            .route("/add", web::get().to(add_jobs_get))  // Handle GET for the form
-            .route("/add", web::post().to(add_jobs_post)) // Handle POST to submit the form
-            .route("/rem", web::get().to(rem_jobs_get))
-            .route("/rem", web::post().to(rem_jobs_post))
             .service(Files::new("/static", "./static").show_files_listing()) // Serve the static style.css files.
+            .route("/", web::get().to(list_jobs))
+            .route("/", web::post().to(add_job))
+            .route("/", web::post().to(rem_job))
     });
 
     // Fix: Properly handle the `.bind()` result
