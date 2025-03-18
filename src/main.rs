@@ -66,7 +66,7 @@ async fn rem_job(form: web::Form<JobRemovalForm>) -> impl Responder {
 
 async fn add_job(form: web::Form<Job>) -> impl Responder {
 
-    info!("Received job form: {:?}", form);
+    info!("\nReceived job form: {:?}", form);
     // If the form has been submitted, process the data (POST)
     // Open the SQLite database
     let database_file = "jobs_data.db";
@@ -83,6 +83,8 @@ async fn add_job(form: web::Form<Job>) -> impl Responder {
         "Yes" => true,
         _ => false, // All other (No or other).
     };
+
+    info!("APPLIED ERROR BALH");
 
     let new_job = Job::new( 
         None, // For autoincrement in database.
@@ -122,20 +124,48 @@ async fn list_jobs(tera: web::Data<Tera>) -> impl Responder {
         }
     };
 
+    match get_jobs(&connection) {
+        Ok(jobs) => {
+            info!("Jobs to render: {:?}", jobs); // Add this log to debug
+
+            let mut context = tera::Context::new();
+            context.insert("jobs", &jobs);
+
+            match tera.render("jobs.html", &context) {
+                Ok(renderer) => HttpResponse::Ok().content_type("text/html").body(renderer),
+                Err(err) => {
+                    error!("Template rendering error: {:?}", err);
+                    HttpResponse::InternalServerError().body(format!("Error rendering template: {:?}", err))
+                }
+            }
+        },
+        Err(err) => {
+             error!("Error fetching jobs: {}", err);
+             HttpResponse::InternalServerError().body("Error fetching jobs.")
+        }
+    }
+/*
     info!("Received request: GET /jobs");
     match get_jobs(&connection) {
         Ok(jobs) => {
             let mut context = tera::Context::new();
             context.insert("jobs", &jobs); // Passing the jobs list to the html.
 
-            let renderer = tera.render("jobs.html", &context).unwrap();
-            HttpResponse::Ok().content_type("text/html").body(renderer)
+            info!("Fetched Jobs: {:?}", &jobs);
+
+            match tera.render("jobs.html", &context) {
+                Ok(renderer) => HttpResponse::Ok().content_type("text/html").body(renderer),
+                Err(err) => {
+                    error!("Template rendering error: {}", err);
+                    HttpResponse::InternalServerError().body("Error rendering template.")
+                }
+            }
         }
         Err(err) => {
              error!("Error fetching jobs: {}", err);
              HttpResponse::InternalServerError().body("Error fetching jobs.")
         }
-    }
+    }*/
 }
 
 use serde::Serialize;

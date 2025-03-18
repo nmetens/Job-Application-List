@@ -22,18 +22,12 @@
         <!-- Job rows will be inserted here into the placeholder: -->
         {% for job in jobs %} <!-- jobs is passed in from rust code. -->
         <!-- The data for each job object is extracted and added to a table row: -->
-        <tr {% if job.applied %} class="highlight-green" {% else %} class="highlight-red" {% endif %}>
+        <tr {% if job.applied  %} class="highlight-green" {% else %} class="highlight-red" {% endif %}>
             <td>{{ job.id }}</td>
             <td>{{ job.title }}</td>
             <td>${{ job.hourly }}</td>
             <td><span class="applied-status" data-job-id="{{ job.id }}" onclick="toggleAppliedStatus(this)">
-                {% if job.applied is not defined %}
-                    No Data
-                {% elif job.applied %}
-                    Yes
-                {% else %}
-                    No
-                {% endif %}
+                {% if job.applied %} Yes {% else %} No {% endif %}
                 </span>
             </td>
             {% if job.link and job.link != "No Link" %}
@@ -60,9 +54,8 @@
 
             <label for="applied">Applied</label>
             <select id="applied" name="applied" required>
-                <option value="No" {% if job.applied is not defined %}selected{% endif %}>No</option>
-                <option value="Yes" {% if job.applied == "Yes" %}selected{% endif %}>Yes</option>
-                <option value="No" {% if not job.applied == "No" %}selected{% endif %}>No</option>
+                <!--{% if job.applied == "Yes" %}<option value="Yes" selected>Yes</option>{% endif %}
+                {% if not job.applied == "No" %}<option value="No" selected>No</option>{% endif %}-->
             </select><br><br>
 
             <label for="link">Link</label>
