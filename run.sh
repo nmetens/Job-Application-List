@@ -67,7 +67,7 @@ case "$1" in
         cargo clippy
         ;;
     run)
-        cargo run
+        cargo run "$2"
         ;;
     test)
         cargo test
@@ -77,6 +77,10 @@ case "$1" in
         ;;
     *) # Display the usage for the project when no 
        # command line args are passed in to bash file:
+        echo "This Project creates a server that displays jobs for a Job Application List. You choose what jobs to add, delete,"
+        echo "update, and apply to. You can just run with \"./run.sh run\" which will run the server on port 8000, or you can specify"
+        echo "a port with an argument: \"./run run <port_number>\"."
+        echo ""
         echo "Usage: $0 <command>"
         echo ""
         echo "Commands:"
@@ -97,7 +101,8 @@ case "$1" in
         echo "  $0 sql applied no   # Display the total jobs in the table NOT applied to"
         echo "  $0 sql drop         # Drop the jobs table in the database (Start Fresh Job Application)"
         echo "  $0 build            # Build the project"
-        echo "  $0 run              # Run the project"
+        echo "  $0 run              # Run the project with a default port of '8000'"
+        echo "  $0 run <port>       # Run the project with a port of <port>"
         echo ""
 
         exit 1

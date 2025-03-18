@@ -1,3 +1,6 @@
+/* JS methods to interact with the onclicks inside of the html page.
+Buttons and pop-ups are the main usage of this JS. */
+
 // AJAX scripting for the clicking of buttons:
 $(document).ready(function() {
     // Click event for the "Add a Job" button

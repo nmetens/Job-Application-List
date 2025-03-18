@@ -24,6 +24,15 @@ use rusqlite::{Connection};
 use crate::database_methods::{create_table, database_empty};
 use tera::Tera;
 use actix_files::Files;
+use std::str::FromStr;
+
+// Function to validate if the port is a valid number between 1 and 65535.
+fn is_valid_port(port: &str) -> bool {
+    match u16::from_str(port) {
+        Ok(p) => p > 0, // Port number greater than 0.
+        Err(_) => false, // Return false if the port is not a valid number.
+    }
+}
 
 /// The main entry point for the Actix Web server.
 ///
@@ -37,10 +46,22 @@ use actix_files::Files;
 /// - Binds the server to `127.0.0.1:<port>` (where <port> is a command line arg) and starts it.
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let host: &str = "127.0.0.1"; // localhost
-    let port: &str = "8000"; // listen on port 8000 for requests to server.
+    // Get command line arguments for the port:
+    let args: Vec<String> = env::args().collect();
 
-    let url: &str = &(host.to_owned() + ":" +  port); // Where the server is listening.
+    // Set default port in case no command line args are given:
+    let default_port = "8000";
+
+    // Determine the port to use:
+    let port = if args.len() > 1 && is_valid_port(&args[1]) {
+        &args[1] // Use the port from arguments if valid.
+    } else {
+        eprintln!("Invalid port number or no port provided, using default: {}", default_port);
+        default_port // Use the default port if invalid or not provided
+    }; 
+
+    let host: &str = "127.0.0.1"; // localhost
+    let url: &str = &(host.to_owned() + ":" + port); // The URL the server will bind to
 
     // Job application database file:
     let database_file: &str = "jobs_data.db";
@@ -95,7 +116,7 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     // Only log my messages, no verbose internal actix logs:
-    info!("Server listening on \"{}", url);
+    info!("Server listening on \"{}\"", url);
 
     // Initialize Tera template engine where the html files are located:
     let tera = Tera::new("templates/**/*").unwrap();
