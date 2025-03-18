@@ -23,6 +23,7 @@ use crate::job::Job;
 
 async fn rem_job(form: web::Form<JobRemovalForm>, tera: web::Data<Tera>) -> impl Responder {
 
+    info!("DELETE Request to Database..."); 
     let database_file = "jobs_data.db";
 
     let connection = match Connection::open(database_file) {
@@ -70,7 +71,8 @@ async fn rem_job(form: web::Form<JobRemovalForm>, tera: web::Data<Tera>) -> impl
 
 async fn add_job(form: web::Form<Job>) -> impl Responder {
 
-    info!("Received job form: {:?}", form);
+    info!("POST Request to Database...");
+    info!("Received Job Form: {:?}", form);
     // If the form has been submitted, process the data (POST)
     // Open the SQLite database
     let database_file = "jobs_data.db";
@@ -85,7 +87,6 @@ async fn add_job(form: web::Form<Job>) -> impl Responder {
     // Insert the new job into the database
     let applied_int = match form.get_applied().as_str() {
         "Yes" => 1,
-        "No" => 0,
         _ => 0, // Default to "No" if somehow invalid value is sent
     };
 
@@ -132,6 +133,8 @@ async fn list_jobs(tera: web::Data<Tera>) -> impl Responder {
         Ok(jobs) => {
             let mut context = tera::Context::new();
             context.insert("jobs", &jobs); // Passing the jobs list to the html.
+
+            info!("Fetched Jobs From jobs.html Form: {:?}", &jobs);
 
             let renderer = tera.render("jobs.html", &context).unwrap();
             HttpResponse::Ok().content_type("text/html").body(renderer)

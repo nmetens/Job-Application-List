@@ -21,20 +21,20 @@
 
         <!-- Job rows will be inserted here into the placeholder: -->
         {% for job in jobs %} <!-- jobs is passed in from rust code. -->
-        <tr> <!-- The data for each job object is extracted and added to a table row: -->
+        <!-- The data for each job object is extracted and added to a table row: -->
+        <tr {% if job.applied == "Yes" %} class="highlight-green" {% else %} class="highlight-red" {% endif %}> 
             <td>{{ job.id }}</td>
             <td>{{ job.title }}</td>
             <td>{{ job.hourly }}</td>
-            <!-- <td>{{ job.applied }}</td> -->
             <td> 
                 <span class="applied-status" data-job-id="{{ job.id }}" onclick="toggleAppliedStatus(this)">
-                {% if job.applied %} Yes {% else %} No {% endif %}
+                    {{ job.applied }}
                 </span>
             </td>
             {% if job.link and job.link != "No Link" %}
                 <td><a href="{{ job.link }}" target="_blank">Link to Application</a></td>
             {% else %}
-              <span>No link</span>
+              <td>No link</td>
             {% endif %}
         </tr>
         {% endfor %}
@@ -45,6 +45,7 @@
 
     <!-- Placeholder for dynamically loaded forms -->
     <div id="addJobForm" style="display:none;">
+        <h2>Add a Job</h2>
         <form action="/add" method="POST">
             <label for="title">Job Title</label>
             <input type="text" id="title" name="title" required><br><br>
@@ -71,7 +72,6 @@
                 {{ message }}
             </p>
         {% endif %}
-
         <h2>Remove a Job</h2>
         <form action="/rem" method="POST">
             <label for="id">Enter Job ID to Remove:</label>
