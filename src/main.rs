@@ -46,23 +46,17 @@ async fn rem_job(form: web::Form<JobRemovalForm>, tera: web::Data<Tera>) -> impl
     // Call remove method with the connection and the id captured from the html form:
     match remove_data(&connection, job_id) {
         Ok(true) => {
-            context.insert("message", &format!("Job with ID {} successfully deleted.", job_id));
-            context.insert("success", &true);
             // Redirect to the jobs list page after successful form submission:
             info!("Successful DELETE in database.");
             HttpResponse::Found().append_header(("LOCATION", "/")).finish()
         },
 
         Ok(false) => {
-            context.insert("message", &format!("No job found with ID {}.", job_id));
-            context.insert("success", &false);
             info!("No job with id {} found in the database.", job_id);
             HttpResponse::Found().append_header(("LOCATION", "/")).finish()
         },
 
         Err(_) => {
-            context.insert("message", "Failed to delete job.");
-            context.insert("success", &false);
             eprintln!("Error removing the job from the database.");
             HttpResponse::Found().append_header(("LOCATION", "/")).finish()
         }

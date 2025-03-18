@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Basic HTML data tags: -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Application Site</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- For AJAX -->
-    <script src="/static/scripts.js"></script> <!-- Link to your external JS file -->
+    <script src="/static/scripts.js"></script> <!-- Link to external JS file -->
     <link rel="stylesheet" href="/static/style.css"> <!-- For styling the page -->
 </head>
 <body>
-     <h1>Job List:</h1>
-    <table>
+    <h1>Job List:</h1>
+    <table> <!-- Table holding the Job information -->
         <tr>
             <th>ID</th>
             <th>Job Title</th>
@@ -20,65 +21,70 @@
         </tr>
 
         <!-- Job rows will be inserted here into the placeholder: -->
-        {% for job in jobs %} <!-- jobs is passed in from rust code. -->
+        {% for job in jobs %} <!-- jobs is passed in from rust code -->
         <!-- The data for each job object is extracted and added to a table row: -->
         <tr {% if job.applied == "Yes" %} class="highlight-green" {% else %} class="highlight-red" {% endif %}> 
             <td>{{ job.id }}</td>
             <td>{{ job.title }}</td>
             <td>{{ job.hourly }}</td>
             <td> 
+                <!-- Addded Javascript styling for clicking on the applied column to swap between "Yes"/"No" -->
                 <span class="applied-status" data-job-id="{{ job.id }}" onclick="toggleAppliedStatus(this)">
                     {{ job.applied }}
                 </span>
             </td>
-            {% if job.link and job.link != "No Link" %}
-                <td><a href="{{ job.link }}" target="_blank">Link to Application</a></td>
-            {% else %}
-              <td>No link</td>
-            {% endif %}
+                <!-- Display the job link, or "No Link" if there isn't one -->
+                {% if job.link and job.link != "No Link" %}
+                    <td><a href="{{ job.link }}" target="_blank">Link to Application</a></td>
+                {% else %}
+                  <td>No link</td>
+                {% endif %}
         </tr>
         {% endfor %}
     </table>   
 
+    <!-- Overlay for the Modal that pops up when the add job and remove job buttons are clicked: -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="close-btn" id="closeModalBtn">X</button>
+
+            <!-- Add Job Form captures the job data in the front end and is caputed in rust for the backend: -->
+            <div id="addJobForm">
+                <h2>Add a Job</h2>
+                <form action="/add" method="POST">
+                    <label for="title">Job Title</label>
+                    <input type="text" id="title" name="title" required><br><br>
+
+                    <label for="hourly">Hourly Rate</label>
+                    <input type="number" id="hourly" name="hourly" required><br><br>
+
+                    <label for="applied">Applied</label>
+                    <select id="applied" name="applied" required>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select><br><br>
+
+                    <label for="link">Link</label>
+                    <input type="url" id="link" name="link"><br><br>
+
+                    <button type="submit">Add Job</button>
+                </form>
+            </div>
+
+            <!-- Remove Job Form captures the job id and removes by id from the jobs table in the database from rust: -->
+            <div id="removeJobForm">
+                <h2>Remove a Job</h2>
+                <form action="/rem" method="POST">
+                    <label for="id">Enter Job ID to Remove:</label>
+                    <input type="number" id="id" name="id" required>
+                    <button type="submit">Remove Job</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buttons for the Modal -->
     <button id="addJobBtn">Add a Job</button>
     <button id="removeJobBtn">Remove a Job</button>
-
-    <!-- Placeholder for dynamically loaded forms -->
-    <div id="addJobForm" style="display:none;">
-        <h2>Add a Job</h2>
-        <form action="/add" method="POST">
-            <label for="title">Job Title</label>
-            <input type="text" id="title" name="title" required><br><br>
-
-            <label for="hourly">Hourly Rate</label>
-            <input type="number" id="hourly" name="hourly" required><br><br>
-
-            <label for="applied">Applied</label>
-            <select id="applied" name="applied" required>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-            </select><br><br>
-
-            <label for="link">Link</label>
-            <input type="url" id="link" name="link"><br><br>
-
-            <button type="submit">Add Job</button>
-        </form>
-    </div>
-
-    <div id="removeJobForm" style="display:none;">
-        {% if message %}
-            <p style="color: {% if success %}green{% else %}red{% endif %};">
-                {{ message }}
-            </p>
-        {% endif %}
-        <h2>Remove a Job</h2>
-        <form action="/rem" method="POST">
-            <label for="id">Enter Job ID to Remove:</label>
-            <input type="number" id="id" name="id" required>
-            <button type="submit">Remove Job</button>
-        </form>
-    </div>
-
 </body>
 </html>
