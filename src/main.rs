@@ -62,7 +62,7 @@ async fn rem_job(form: web::Form<JobRemovalForm>) -> impl Responder {
 async fn add_job(form: web::Form<Job>) -> impl Responder {
 
     info!("POST Request to Database...");
-    //info!("Received Job Form: {:?}", form);
+    info!("Received Job Form: {:?}", form);
     // If the form has been submitted, process the data (POST)
     // Open the SQLite database
     let database_file = "jobs_data.db";
@@ -75,18 +75,16 @@ async fn add_job(form: web::Form<Job>) -> impl Responder {
     };
 
     // Insert the new job into the database
-    let applied = match form.get_applied().as_str() {
-        "Yes" => true,
-        _ => false, // Default to "No" if somehow invalid value is sent
+    let applied_int = match form.get_applied().as_str() {
+        "Yes" => 1,
+        _ => 0, // Default to "No" if somehow invalid value is sent
     };
 
-    info!("APPLIED ERROR BALH");
-
-    let new_job = Job::new( 
+    let new_job = Job::new(
         None, // For autoincrement in database.
         form.get_title().clone(),
         form.get_hourly(),
-        applied,
+        applied_int.to_string(),
         Some(form.get_link().clone())
     );
     info!("Job Link: {:?}", new_job.get_link());
@@ -98,7 +96,7 @@ async fn add_job(form: web::Form<Job>) -> impl Responder {
             // Redirect to the jobs list page after successful form submission
             info!("Successful POST to database.");
             HttpResponse::Found().append_header(("LOCATION", "/")).finish()
-        },
+    },
         Err(err) => {
             eprintln!("Error inserting job into the database: {}", err);
             HttpResponse::InternalServerError().body("Error inserting job into the database.")
