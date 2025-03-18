@@ -127,3 +127,8 @@ pub fn drop_table(
     println!("Table '{}' has been dropped.", table_name);
     Ok(())
 }
+
+pub fn update_applied(connection: &rusqlite::Connection, new_status: bool, job_id: i64) -> rusqlite::Result<()> {
+    connection.execute("UPDATE jobs SET applied = ? WHERE id = ?", (new_status as i32, job_id))?;
+    Ok(())
+}

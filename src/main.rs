@@ -14,7 +14,7 @@ use std::env;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use std::io::Write;
 use rusqlite::{Connection};
-use crate::database_methods::{get_jobs, enter_data, create_table, remove_data};
+use crate::database_methods::{get_jobs, enter_data, create_table, remove_data, update_applied};
 use crate::job::JobRemovalForm;
 use tera::{Tera, Context};
 use actix_files::Files;
@@ -143,6 +143,50 @@ async fn list_jobs(tera: web::Data<Tera>) -> impl Responder {
     }
 }
 
+use serde::Serialize;
+#[derive(Serialize)]
+struct ApiResponse {
+    success: bool,
+}
+
+// Define the structure to accept the job ID and new status
+#[derive(serde::Deserialize)]
+pub struct JobStatusUpdate {
+    pub id: i64,
+    pub applied: bool,
+}
+
+async fn update(form: web::Json<JobStatusUpdate>) -> impl Responder {
+    println!("Received update request: id={}, applied={}", form.id, form.applied); // ✅ Debugging log
+    // Job application database file:
+    let database_file: &str = "jobs_data.db";
+
+    // Create an SQLite database file. Open the database
+    // file if it already exists.
+    let connection = match Connection::open(database_file) {
+        Ok(conn) => conn,
+        Err(err) => {
+            eprintln!("Error opening the database: {}", err);
+            return HttpResponse::InternalServerError().body("Error opening the database.");
+        }
+    };
+
+    let job_id = form.id;
+    let job_applied = form.applied.clone();
+
+    //let result = update_applied(&connection, job_applied, job_id);
+    match update_applied(&connection, job_applied, job_id) {
+        Ok(_) => {
+            info!("Successfully updated application status in database.");
+            HttpResponse::Ok().json(ApiResponse { success: true }) // ✅ Return JSON
+        },
+        Err(err) => {
+            eprintln!("Error updating application status in database: {}", err);
+            HttpResponse::InternalServerError().json(ApiResponse { success: false })
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let host: &str = "127.0.0.1"; // localhost
@@ -200,6 +244,7 @@ async fn main() -> std::io::Result<()> {
             .route("/", web::get().to(list_jobs))
             .route("/add", web::post().to(add_job)) // POST for adding jobs.
             .route("/rem", web::post().to(rem_job)) // POST for removing jobs.
+            .route("/update", web::post().to(update))
     });
 
     // Fix: Properly handle the `.bind()` result
