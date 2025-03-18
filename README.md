@@ -3,32 +3,51 @@
 
 # Job Application List
 
-This project is still in the works. Some of the current features and 
-future features are described below under thier subheaders. There is
-also a Resources section with all of the links and information that helped
-me to solve problems in my rust code.
+A Rust-based project that helps you manage your job applications in an easy-to-use way. It allows you to view, add, remove, and update job listings from a SQLite database, all through a local server. The project features a neat front-end built with HTML, CSS, and JavaScript.
 
-## Current Features
+## Features
 
-The program currently can create objects of the job and application structs.
-The app struct has a vector list of jobs that are then added to a file as
-the database to store the jobs that are being applied for.
+- **Add jobs:** Keep track of job listings by adding new positions.
+- **Delete jobs:** Remove any job from the database by its *id* when no longer relevant.
+- **Update job status:** Update the application status of a job, such as whether you've applied to it or not.
+- **SQL commands:** Run custom SQL queries directly through the command line to interact with the job database.
+- **Customizable port:** Run the server on a default port or specify your own.
 
-## Future Features
+## The Job Data
 
-The final product will be a webpage with a rust front and backend that
-will allow users to create, add, and remove jobs, as well as access their
-application links and apply from the webpage all in one place.
+Each job in the database has an id, a job title, an hourly rate, an application status, and a link to the application on the web.
+
+## Build The Project
+
+Once inside the Project Directory, you can run either `cargo build` or `./run.sh build`.
+I have implemented a `run.sh` bash script which explains all of the parts of how to work the project.
+
+## Run The Project Screenshot
+![Job Application List Command Line Script](static/run-script.png)
+
+## Apllication Screenshot
+The application:
+![Application](static/home-page.png)
+
+Add a new Job:
+![Add Job](static/add-job.png)
+
+Remove a Job by id:
+![Remove Job](static/remove-job.png)
 
 ### Resources
 [File Handling](https://doc.rust-lang.org/std/fs/struct.File.html)
+[CSV](https://docs.rs/csv/latest/csv/)
 [Rust by Example](https://doc.rust-lang.org/rust-by-example/)
 [chatgpt](https://chatgpt.com/)
 [Markdown Cheat-Sheet](https://www.markdownguide.org/cheat-sheet/)
+[Actix-Web](https://actix.rs/docs/)
+[SQL in Rust](https://docs.rs/sqlite/latest/sqlite/)
 [MIT License](https://opensource.org/license/MIT)
 [Apache License](http://www.apache.org/licenses/LICENSE-2.0)
+[HTML Cheat Sheet](https://www.codecademy.com/learn/learn-html/modules/learn-html-elements/cheatsheet)
 
-## License
+## Licenses
 
 ### MIT License
 
