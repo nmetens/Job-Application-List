@@ -35,7 +35,7 @@ pub struct Job {
     id: Option<i64>,
     title: String,
     hourly: f32,
-    applied: bool,
+    applied: String,
     link: Option<String>, // link is an optional field.
 }
 
@@ -56,7 +56,7 @@ pub struct JobStatusUpdate {
 impl Job {
     // Constructor:
     //pub fn new(job_id: i64, title: String, hourly: f32) -> Self {
-    pub fn new(id: Option<i64>, title: String, hourly: f32, applied: bool, link: Option<String>) -> Self {
+    pub fn new(id: Option<i64>, title: String, hourly: f32, applied: String, link: Option<String>) -> Self {
         Self {
             id,
             title,
@@ -83,7 +83,7 @@ impl Job {
     }
 
     pub fn get_applied(&self) -> String {
-        if self.applied { "Yes".to_string() } else { "No".to_string() }
+        self.applied.clone() 
     }
 }
 

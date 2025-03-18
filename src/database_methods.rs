@@ -86,10 +86,8 @@ pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite:
         let hourly: f32 = row.get::<_, f32>(2)?;        // hourly
 
         // Properly handle the Result and convert applied value to "Yes" or "No"
-        //let applied_status: bool = row.get::<_, i64>(3)? == 1; // Convert 1/0 to true/false
-        let applied_status: bool = row.get::<_, i64>(3)?.eq(&1); // Convert 1/0 to true/false
-        
-        //let applied_status = if applied == 1 { "Yes".to_string() } else { "No".to_string() };
+        let applied: i64 = row.get::<_, i64>(3)?;       // applied
+        let applied_status = if applied == 1 { "Yes".to_string() } else { "No".to_string() };
 
         // link
         //let link: String = row.get::<_, String>(4).ok().unwrap_or("No Link".to_string());
