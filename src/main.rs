@@ -2,6 +2,13 @@
 // Class: Rust 523
 // Professor: Bart Massey
 
+///! This is the main method.
+///! The server is initialized here in main.
+///! All the mothod calls used by the routes
+///! to manipulate the database are found in the
+///! server module which is included.
+
+mod server;
 mod csv_reader;
 mod job; // References job.rs file
 mod database_methods;
@@ -11,179 +18,23 @@ mod database_methods;
 use log::{info, LevelFilter, error};
 use env_logger::Builder;
 use std::env;
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpServer};
 use std::io::Write;
 use rusqlite::{Connection};
-use crate::database_methods::{get_jobs, enter_data, create_table, remove_data, update_applied, database_empty};
-use crate::job::JobRemovalForm;
-use tera::{Tera, Context};
+use crate::database_methods::{create_table, database_empty};
+use tera::Tera;
 use actix_files::Files;
 
-use crate::job::Job;
-
-async fn rem_job(form: web::Form<JobRemovalForm>) -> impl Responder {
-
-    info!("DELETE Request to Database..."); 
-    let database_file = "jobs_data.db";
-
-    let connection = match Connection::open(database_file) {
-        Ok(conn) => conn,
-
-        Err(err) => {
-            eprintln!("Error opening the database: {}", err);
-            return HttpResponse::InternalServerError().body("Error opening the database.");
-        }
-    };
-
-    let job_id = form.id;
-    let mut context = Context::new();
-
-    // Call remove method with the connection and the id captured from the html form:
-    match remove_data(&connection, job_id) {
-        Ok(true) => {
-            // Redirect to the jobs list page after successful form submission:
-            info!("Successful DELETE in database.");
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
-        },
-
-        Ok(false) => {
-            info!("No job with id {} found in the database.", job_id);
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
-        },
-
-        Err(_) => {
-            eprintln!("Error removing the job from the database.");
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
-        }
-    }
-}
-
-
-async fn add_job(form: web::Form<Job>) -> impl Responder {
-
-    info!("POST Request to Database...");
-    info!("Received Job Form: {:?}", form);
-    // If the form has been submitted, process the data (POST)
-    // Open the SQLite database
-    let database_file = "jobs_data.db";
-    let connection = match Connection::open(database_file) {
-        Ok(conn) => conn,
-        Err(err) => {
-            eprintln!("Error opening the database: {}", err);
-            return HttpResponse::InternalServerError().body("Error opening the database.");
-        }
-    };
-
-    // Insert the new job into the database
-    let applied_int = match form.get_applied().as_str() {
-        "Yes" => 1,
-        _ => 0, // Default to "No" if somehow invalid value is sent
-    };
-
-    let new_job = Job::new(
-        None, // For autoincrement in database.
-        form.get_title().clone(),
-        form.get_hourly(),
-        applied_int.to_string(),
-        Some(form.get_link().clone())
-    );
-    info!("Job Link: {:?}", new_job.get_link());
-
-    let result = enter_data(&connection, &new_job);
-
-    match result {
-        Ok(_) => {
-            // Redirect to the jobs list page after successful form submission
-            info!("Successful POST to database.");
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
-    },
-        Err(err) => {
-            eprintln!("Error inserting job into the database: {}", err);
-            HttpResponse::InternalServerError().body("Error inserting job into the database.")
-        }
-    }
-}
-
-async fn list_jobs(tera: web::Data<Tera>) -> impl Responder {
-    // Job application database file:
-    let database_file: &str = "jobs_data.db";
-
-    // Create an SQLite database file. Open the database
-    // file if it already exists.
-    let connection = match Connection::open(database_file) {
-        Ok(conn) => conn,
-        Err(err) => {
-            eprintln!("Error opening the database: {}", err);
-            return HttpResponse::InternalServerError().body("Error opening the database.");
-        }
-    };
-
-    match get_jobs(&connection) {
-        Ok(jobs) => {
-            info!("Jobs to render: {:?}", jobs); // Add this log to debug
-
-            let mut context = tera::Context::new();
-            context.insert("jobs", &jobs);
-
-            match tera.render("jobs.html", &context) {
-                Ok(renderer) => HttpResponse::Ok().content_type("text/html").body(renderer),
-                Err(err) => {
-                    error!("Template rendering error: {:?}", err);
-                    HttpResponse::InternalServerError().body(format!("Error rendering template: {:?}", err))
-                }
-            }
-        },
-        Err(err) => {
-             error!("Error fetching jobs: {}", err);
-             HttpResponse::InternalServerError().body("Error fetching jobs.")
-        }
-    }
-}
-
-use serde::Serialize;
-#[derive(Serialize)]
-struct ApiResponse {
-    success: bool,
-}
-
-// Define the structure to accept the job ID and new status
-#[derive(serde::Deserialize)]
-pub struct JobStatusUpdate {
-    pub id: i64,
-    pub applied: bool,
-}
-
-async fn update(form: web::Json<JobStatusUpdate>) -> impl Responder {
-    println!("Received update request: id={}, applied={}", form.id, form.applied); // ✅ Debugging log
-    // Job application database file:
-    let database_file: &str = "jobs_data.db";
-
-    // Create an SQLite database file. Open the database
-    // file if it already exists.
-    let connection = match Connection::open(database_file) {
-        Ok(conn) => conn,
-        Err(err) => {
-            eprintln!("Error opening the database: {}", err);
-            return HttpResponse::InternalServerError().body("Error opening the database.");
-        }
-    };
-
-    let job_id = form.id;
-    let job_applied = form.applied.clone();
-
-    //let result = update_applied(&connection, job_applied, job_id);
-    match update_applied(&connection, job_applied, job_id) {
-        Ok(_) => {
-            info!("Successfully updated application status in database.");
-            HttpResponse::Ok().json(ApiResponse { success: true }) // ✅ Return JSON
-        },
-        Err(err) => {
-            eprintln!("Error updating application status in database: {}", err);
-            HttpResponse::InternalServerError().json(ApiResponse { success: false })
-        }
-    }
-}
-
+/// The main entry point for the Actix Web server.
+///
+/// This function:
+/// - Initializes the SQLite database, opening it or creating it if necessary.
+/// - Creates the required table in the database if it doesn't exist.
+/// - Checks if the database is empty and populates it with data from a CSV file if it is.
+/// - Sets up logging configuration to only display relevant log messages (suppresses unnecessary internal Actix logs).
+/// - Initializes the Tera template engine for rendering HTML files.
+/// - Configures an Actix Web server with routes to handle jobs listing, adding, removing, and updating jobs.
+/// - Binds the server to `127.0.0.1:<port>` (where <port> is a command line arg) and starts it.
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let host: &str = "127.0.0.1"; // localhost
@@ -194,7 +45,7 @@ async fn main() -> std::io::Result<()> {
     // Job application database file:
     let database_file: &str = "jobs_data.db";
 
-    // Create an SQLite database file. Open the database
+    // Create an SQLite database file. Open the database.
     // file if it already exists.
     let connection = match Connection::open(database_file) {
         Ok(conn) => conn,
@@ -207,11 +58,11 @@ async fn main() -> std::io::Result<()> {
     // Create the table if it doesn't exist:
     if let Err(err) = create_table(&connection) {
         error!("Error creating table: {}", err);
-        std::process::exit(1); // Stop execution if the table fails to create
+        std::process::exit(1); // Stop execution if the table fails to create.
     }
 
     // Check if the database is empty, if it is, add the csv data to the jobs table:
-    // Now, we can safely use the connection
+    // Now, we can safely use the connection:
     match database_empty(&connection) {
         Ok(is_empty) => {
             if is_empty {
@@ -255,13 +106,13 @@ async fn main() -> std::io::Result<()> {
             // to database of displays jobs in html:
             .app_data(web::Data::new(tera.clone())) // Add Tera to Actix app data.
             .service(Files::new("/static", "./static").show_files_listing()) // Serve the static style.css files.
-            .route("/", web::get().to(list_jobs))
-            .route("/add", web::post().to(add_job)) // POST for adding jobs.
-            .route("/rem", web::post().to(rem_job)) // POST for removing jobs.
-            .route("/update", web::post().to(update))
+            .route("/", web::get().to(server::list_jobs))
+            .route("/add", web::post().to(server::add_job)) // POST for adding jobs.
+            .route("/rem", web::post().to(server::rem_job)) // POST for removing jobs.
+            .route("/update", web::post().to(server::update))
     });
 
-    // Fix: Properly handle the `.bind()` result
+    // Properly handle the `.bind()` result
     let server = match server.bind(&url) {
         Ok(server) => server,
         Err(err) => {
