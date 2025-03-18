@@ -10,6 +10,7 @@
 use csv::Reader;
 use std::error::Error;
 use crate::Job;
+use rusqlite::params;
 
 /// Reads a csv file.
 ///
@@ -44,37 +45,53 @@ use crate::Job;
 /// assert_eq!(jobs.get(0).expect("ERROR").get_title(), "Bus Driver");
 /// ```
 pub fn _read_csv_file<'a>(
-    file: &'a str,
-    jobs: &'a mut Vec<Job>,
-) -> Result<&'a Vec<Job>, Box<dyn Error>> {
-    let mut csv_reader = Reader::from_path(file)?;
+    file: &'a str, // The CSV file to add to the database.
+    connection: &rusqlite::Connection, // The databse connection.
+) -> Result<(), Box<dyn Error>> {
+    let mut csv_reader = Reader::from_path(file)?; // Get the reader to the file.
+
+    // Prepare the SQL statement for inserting jobs into the database:
+    let mut stmt = connection.prepare(
+        "INSERT INTO jobs (job_id, job_title, hourly_rate, applied, link)
+        VALUES (?1, ?2, ?3, ?4, ?5)",
+    )?;
 
     for job in csv_reader.records() {
         match job {
             Ok(record) => {
                 let job_id: i64 = record
-                    .get(3)
+                    .get(0)
                     .and_then(|s| s.parse::<i64>().ok())
                     .unwrap_or(0); // Default to 0 (false) if None or parsing fails.
-                let job_title = record.get(1).expect("Failed to read title").to_string();
+
+                let job_title = record
+                    .get(1)
+                    .expect("Failed to read title")
+                    .to_string();
+
                 let hourly_rate: f32 = record
                     .get(2)
                     .and_then(|s| s.parse::<f32>().ok()) // Parse if Some, return None if parse fails.
                     .unwrap_or(0.0); // Default to 0.0 if None or parsing fails.
+
                 let applied: bool = record
                     .get(3)
                     .and_then(|s| s.parse::<i64>().ok()) // Try to parse as i64
                     .map(|n| n == 1) // Convert i64 (1 or 0) to bool (true or false)
                     .unwrap_or(false); // Default to false if parsing fails
-                let link: String = record.get(4).unwrap_or("N/A").to_string();
 
-                let new_job = Job::new(Some(job_id), job_title, hourly_rate, applied, Some(link));
-                jobs.push(new_job); // Add the job to the application.
+                let link: String = record
+                    .get(4)
+                    .unwrap_or("No Link")
+                    .to_string();
+
+                // Insert the job into the database:
+                stmt.execute(params![job_id, job_title, hourly_rate, applied as i64, link])?;
             }
             Err(e) => eprintln!("Error reading job file: {}", e),
         }
     }
-    Ok(jobs)
+    Ok(())
 }
 
 #[cfg(test)]

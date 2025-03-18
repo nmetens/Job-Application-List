@@ -75,9 +75,9 @@ async fn add_job(form: web::Form<Job>) -> impl Responder {
     };
 
     // Insert the new job into the database
-    let applied_int = match form.get_applied().as_str() {
-        "Yes" => 1,
-        _ => 0, // Default to "No" if somehow invalid value is sent
+    let applied = match form.get_applied().as_str() {
+        "Yes" => true,
+        _ => false, // Default to "No" if somehow invalid value is sent
     };
 
     info!("APPLIED ERROR BALH");
@@ -138,43 +138,6 @@ async fn list_jobs(tera: web::Data<Tera>) -> impl Responder {
         Err(err) => {
              error!("Error fetching jobs: {}", err);
              HttpResponse::InternalServerError().body("Error fetching jobs.")
-        }
-    }
-}
-
-use serde::Serialize;
-#[derive(Serialize)]
-struct ApiResponse {
-    success: bool,
-}
-
-async fn update(form: web::Json<JobStatusUpdate>) -> impl Responder {
-    println!("Received update request: id={}, applied={}", form.id, form.applied); // ✅ Debugging log
-    // Job application database file:
-    let database_file: &str = "jobs_data.db";
-
-    // Create an SQLite database file. Open the database
-    // file if it already exists.
-    let connection = match Connection::open(database_file) {
-        Ok(conn) => conn,
-        Err(err) => {
-            eprintln!("Error opening the database: {}", err);
-            return HttpResponse::InternalServerError().body("Error opening the database.");
-        }
-    };
-
-    let job_id = form.id;
-    let job_applied = form.applied.clone();
-
-    //let result = update_applied(&connection, job_applied, job_id);
-    match update_applied(&connection, job_applied, job_id) {
-        Ok(_) => {
-            info!("Successfully updated application status in database.");
-            HttpResponse::Ok().json(ApiResponse { success: true }) // ✅ Return JSON
-        },
-        Err(err) => {
-            eprintln!("Error updating application status in database: {}", err);
-            HttpResponse::InternalServerError().json(ApiResponse { success: false })
         }
     }
 }
