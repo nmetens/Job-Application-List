@@ -15,7 +15,7 @@ use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use std::io::Write;
 use rusqlite::{Connection};
 use crate::database_methods::{get_jobs, enter_data, create_table, remove_data, update_applied};
-use crate::job::{JobRemovalForm, JobStatusUpdate};
+use crate::job::JobRemovalForm;
 use tera::{Tera, Context};
 use actix_files::Files;
 
@@ -23,6 +23,7 @@ use crate::job::Job;
 
 async fn rem_job(form: web::Form<JobRemovalForm>) -> impl Responder {
 
+    info!("DELETE Request to Database..."); 
     let database_file = "jobs_data.db";
 
     let connection = match Connection::open(database_file) {
@@ -40,23 +41,17 @@ async fn rem_job(form: web::Form<JobRemovalForm>) -> impl Responder {
     // Call remove method with the connection and the id captured from the html form:
     match remove_data(&connection, job_id) {
         Ok(true) => {
-            context.insert("message", &format!("Job with ID {} successfully deleted.", job_id));
-            context.insert("success", &true);
             // Redirect to the jobs list page after successful form submission:
             info!("Successful DELETE in database.");
             HttpResponse::Found().append_header(("LOCATION", "/")).finish()
         },
 
         Ok(false) => {
-            context.insert("message", &format!("No job found with ID {}.", job_id));
-            context.insert("success", &false);
             info!("No job with id {} found in the database.", job_id);
             HttpResponse::Found().append_header(("LOCATION", "/")).finish()
         },
 
         Err(_) => {
-            context.insert("message", "Failed to delete job.");
-            context.insert("success", &false);
             eprintln!("Error removing the job from the database.");
             HttpResponse::Found().append_header(("LOCATION", "/")).finish()
         }
@@ -66,7 +61,8 @@ async fn rem_job(form: web::Form<JobRemovalForm>) -> impl Responder {
 
 async fn add_job(form: web::Form<Job>) -> impl Responder {
 
-    info!("\nReceived job form: {:?}", form);
+    info!("POST Request to Database...");
+    //info!("Received Job Form: {:?}", form);
     // If the form has been submitted, process the data (POST)
     // Open the SQLite database
     let database_file = "jobs_data.db";
@@ -79,9 +75,9 @@ async fn add_job(form: web::Form<Job>) -> impl Responder {
     };
 
     // Insert the new job into the database
-    let applied = match form.get_applied().as_str() {
-        "Yes" => true,
-        _ => false, // All other (No or other).
+    let applied_int = match form.get_applied().as_str() {
+        "Yes" => 1,
+        _ => 0, // Default to "No" if somehow invalid value is sent
     };
 
     info!("APPLIED ERROR BALH");
@@ -144,34 +140,56 @@ async fn list_jobs(tera: web::Data<Tera>) -> impl Responder {
              HttpResponse::InternalServerError().body("Error fetching jobs.")
         }
     }
-/*
-    info!("Received request: GET /jobs");
-    match get_jobs(&connection) {
-        Ok(jobs) => {
-            let mut context = tera::Context::new();
-            context.insert("jobs", &jobs); // Passing the jobs list to the html.
-
-            info!("Fetched Jobs: {:?}", &jobs);
-
-            match tera.render("jobs.html", &context) {
-                Ok(renderer) => HttpResponse::Ok().content_type("text/html").body(renderer),
-                Err(err) => {
-                    error!("Template rendering error: {}", err);
-                    HttpResponse::InternalServerError().body("Error rendering template.")
-                }
-            }
-        }
-        Err(err) => {
-             error!("Error fetching jobs: {}", err);
-             HttpResponse::InternalServerError().body("Error fetching jobs.")
-        }
-    }*/
 }
 
 use serde::Serialize;
 #[derive(Serialize)]
 struct ApiResponse {
     success: bool,
+}
+
+async fn update(form: web::Json<JobStatusUpdate>) -> impl Responder {
+    println!("Received update request: id={}, applied={}", form.id, form.applied); // ✅ Debugging log
+    // Job application database file:
+    let database_file: &str = "jobs_data.db";
+
+    // Create an SQLite database file. Open the database
+    // file if it already exists.
+    let connection = match Connection::open(database_file) {
+        Ok(conn) => conn,
+        Err(err) => {
+            eprintln!("Error opening the database: {}", err);
+            return HttpResponse::InternalServerError().body("Error opening the database.");
+        }
+    };
+
+    let job_id = form.id;
+    let job_applied = form.applied.clone();
+
+    //let result = update_applied(&connection, job_applied, job_id);
+    match update_applied(&connection, job_applied, job_id) {
+        Ok(_) => {
+            info!("Successfully updated application status in database.");
+            HttpResponse::Ok().json(ApiResponse { success: true }) // ✅ Return JSON
+        },
+        Err(err) => {
+            eprintln!("Error updating application status in database: {}", err);
+            HttpResponse::InternalServerError().json(ApiResponse { success: false })
+        }
+    }
+}
+
+use serde::Serialize;
+#[derive(Serialize)]
+struct ApiResponse {
+    success: bool,
+}
+
+// Define the structure to accept the job ID and new status
+#[derive(serde::Deserialize)]
+pub struct JobStatusUpdate {
+    pub id: i64,
+    pub applied: bool,
 }
 
 async fn update(form: web::Json<JobStatusUpdate>) -> impl Responder {
