@@ -132,3 +132,18 @@ pub fn update_applied(connection: &rusqlite::Connection, new_status: bool, job_i
     connection.execute("UPDATE jobs SET applied = ? WHERE id = ?", (new_status as i32, job_id))?;
     Ok(())
 }
+
+pub fn count_rows(connection: &rusqlite::Connection) -> Result<i64, rusqlite::Error> {
+    // Prepare the query to count rows in the 'jobs' table:
+    let mut statement = connection.prepare("SELECT COUNT(*) FROM jobs")?;
+
+    // Execute the query and get the result as a single value (the row count):
+    let count: i64 = statement.query_row([], |row| row.get(0))?;
+
+    Ok(count)
+}
+
+pub fn database_empty(connection: &rusqlite::Connection) -> Result<bool, rusqlite::Error> {
+    let row_count = count_rows(connection)?;
+    Ok(row_count == 0)
+}

@@ -44,22 +44,23 @@ use rusqlite::params;
 /// // Assumes that the application.csv file doesn't change: 
 /// assert_eq!(jobs.get(0).expect("ERROR").get_title(), "Bus Driver");
 /// ```
-pub fn _read_csv_file<'a>(
+pub fn read_csv_file<'a>(
     file: &'a str, // The CSV file to add to the database.
     connection: &rusqlite::Connection, // The databse connection.
 ) -> Result<(), Box<dyn Error>> {
+
     let mut csv_reader = Reader::from_path(file)?; // Get the reader to the file.
 
     // Prepare the SQL statement for inserting jobs into the database:
     let mut stmt = connection.prepare(
-        "INSERT INTO jobs (job_id, job_title, hourly_rate, applied, link)
+        "INSERT INTO jobs (id, job_title, hourly_rate, applied, link)
         VALUES (?1, ?2, ?3, ?4, ?5)",
     )?;
 
     for job in csv_reader.records() {
         match job {
             Ok(record) => {
-                let job_id: i64 = record
+                let id: i64 = record
                     .get(0)
                     .and_then(|s| s.parse::<i64>().ok())
                     .unwrap_or(0); // Default to 0 (false) if None or parsing fails.
@@ -86,11 +87,12 @@ pub fn _read_csv_file<'a>(
                     .to_string();
 
                 // Insert the job into the database:
-                stmt.execute(params![job_id, job_title, hourly_rate, applied as i64, link])?;
+                stmt.execute(params![id, job_title, hourly_rate, applied as i64, link])?;
             }
-            Err(e) => eprintln!("Error reading job file: {}", e),
+            Err(e) => eprintln!("Error reading application.csv file: {}", e),
         }
     }
+
     Ok(())
 }
 

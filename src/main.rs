@@ -14,7 +14,7 @@ use std::env;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use std::io::Write;
 use rusqlite::{Connection};
-use crate::database_methods::{get_jobs, enter_data, create_table, remove_data, update_applied};
+use crate::database_methods::{get_jobs, enter_data, create_table, remove_data, update_applied, database_empty};
 use crate::job::JobRemovalForm;
 use tera::{Tera, Context};
 use actix_files::Files;
@@ -208,6 +208,23 @@ async fn main() -> std::io::Result<()> {
     if let Err(err) = create_table(&connection) {
         error!("Error creating table: {}", err);
         std::process::exit(1); // Stop execution if the table fails to create
+    }
+
+    // Check if the database is empty, if it is, add the csv data to the jobs table:
+    // Now, we can safely use the connection
+    match database_empty(&connection) {
+        Ok(is_empty) => {
+            if is_empty {
+                println!("The database is empty, adding CSV data...");
+                match csv_reader::read_csv_file("application.csv", &connection) {
+                    Ok(_) => println!("CSV data successfully added."),
+                    Err(e) => eprintln!("Error reading CSV file: {}", e),
+                }
+            } else {
+                println!("The database is not empty.");
+            }
+        }
+        Err(e) => eprintln!("Error checking if the database is empty: {}", e),
     }
 
     // Set RUST_LOG=info to allow server-side loggin:
