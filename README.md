@@ -46,7 +46,7 @@ Add a new Job:
 Remove a Job by id:
 ![Remove Job](static/remove-job.png)
 
-## Project Demonstration Viedo
+## Project Demonstration Video
 
 [Watch me explain and showcase my project.](https://www.youtube.com/watch?v=hC-yeYZ3UYg)
 
