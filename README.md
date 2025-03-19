@@ -5,6 +5,8 @@
 
 A Rust-based project that helps you manage your job applications in an easy-to-use way. It allows you to view, add, remove, and update job listings from a SQLite database, all through a local server. The back-end is build in Rust using the Actix-Web crate, along with rusqlite for the database schema. The project features a neat front-end built with HTML, CSS, and JavaScript.
 
+This project is intended for me to keep records of jobs I have applied to, keeping their hourly rate, job title, and link to the application so that I can stay organized while searching for jobs. It is very helpful and incorporates a clean design to be very user friendly.
+
 ## Features
 
 - **Add jobs:** Keep track of job listings by adding new positions.
@@ -12,6 +14,8 @@ A Rust-based project that helps you manage your job applications in an easy-to-u
 - **Update job status:** Update the application status of a job, such as whether you've applied to it or not.
 - **SQL commands:** Run custom SQL queries directly through the command line to interact with the job database.
 - **Customizable port:** Run the server on a default port or specify your own.
+
+Each module in the project contains tests for each method to assure acuracy and intended behavior.
 
 ## The Job Data
 

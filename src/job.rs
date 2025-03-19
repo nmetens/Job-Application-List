@@ -4,7 +4,7 @@
 
 //! # Job Module
 //!
-//! This is the public jobs module. It contains the 
+//! This is the public jobs module. It contains the
 //! Job struct and its implementations for a job. Each
 //! Job object is encapsulated by the application object.
 
@@ -16,12 +16,11 @@
 /// - `title`: The job title as a `String` (position applying to).
 /// - `hourly`: The hourly rate (pay) in floating point of the job.
 /// - `applied`: The number (1 or 0) for whether or not the job has been applied to.
-/// - `link`: The link to the job application. 
-
-use serde::{Serialize, Deserialize}; // Serialize trait to pass a job into tera in main.
+/// - `link`: The link to the job application.
+use serde::{Deserialize, Serialize}; // Serialize trait to pass a job into tera in main.
 
 // Clone trait to make copied of a Job object, and Deserialize/Serialize for tera.
-#[derive(Clone, Serialize, Deserialize, Debug)] 
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Job {
     id: Option<i64>,
     title: String,
@@ -30,7 +29,7 @@ pub struct Job {
     link: Option<String>, // link is an optional field.
 }
 
-// Struct with only the id. Its purpose is to 
+// Struct with only the id. Its purpose is to
 // help remove a job from the database:
 #[derive(serde::Deserialize)]
 pub struct JobRemovalForm {
@@ -54,7 +53,13 @@ pub struct ApiResponse {
 /// The Job struct creates a job with all relavant fields:
 impl Job {
     // Constructor:
-    pub fn new(id: Option<i64>, title: String, hourly: f32, applied: String, link: Option<String>) -> Self {
+    pub fn new(
+        id: Option<i64>,
+        title: String,
+        hourly: f32,
+        applied: String,
+        link: Option<String>,
+    ) -> Self {
         Self {
             id,
             title,
@@ -65,11 +70,11 @@ impl Job {
     }
 
     /// Getter methods becuase all data in each Job object is private:
-    pub fn _get_id(&self) -> i64 { 
+    pub fn _get_id(&self) -> i64 {
         self.id.expect("Failed to create job id.")
     }
 
-    pub fn get_link(&self) -> String { 
+    pub fn get_link(&self) -> String {
         self.link.clone().expect("No Link.")
     }
 
@@ -82,7 +87,7 @@ impl Job {
     }
 
     pub fn get_applied(&self) -> String {
-        self.applied.clone() 
+        self.applied.clone()
     }
 }
 

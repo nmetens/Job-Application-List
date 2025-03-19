@@ -2,34 +2,34 @@
 // Class: Rust 523
 // Professor: Bart Massey
 
-///! This is the main method.
-///! The server is initialized here in main.
-///! All the mothod calls used by the routes
-///! to manipulate the database are found in the
-///! server module which is included.
+//! This is the main method.
+//! The server is initialized here in main.
+//! All the mothod calls used by the routes
+//! to manipulate the database are found in the
+//! server module which is included.
 
-mod server;
 mod csv_reader;
-mod job; // References job.rs file
 mod database_methods;
+mod job; // References job.rs file
+mod server;
 
-// Logging used for the server side to 
+// Logging used for the server side to
 // see GET and POST requests:
-use log::{info, LevelFilter, error};
-use env_logger::Builder;
-use std::env;
-use actix_web::{web, App, HttpServer};
-use std::io::Write;
-use rusqlite::{Connection};
 use crate::database_methods::{create_table, database_empty};
-use tera::Tera;
 use actix_files::Files;
+use actix_web::{web, App, HttpServer};
+use env_logger::Builder;
+use log::{error, info, LevelFilter};
+use rusqlite::Connection;
+use std::env;
+use std::io::Write;
 use std::str::FromStr;
+use tera::Tera;
 
 // Function to validate if the port is a valid number between 1 and 65535.
 fn is_valid_port(port: &str) -> bool {
     match u16::from_str(port) {
-        Ok(p) => p > 0, // Port number greater than 0.
+        Ok(p) => p > 0,  // Port number greater than 0.
         Err(_) => false, // Return false if the port is not a valid number.
     }
 }
@@ -43,7 +43,7 @@ fn is_valid_port(port: &str) -> bool {
 /// - Sets up logging configuration to only display relevant log messages (suppresses unnecessary internal Actix logs).
 /// - Initializes the Tera template engine for rendering HTML files.
 /// - Configures an Actix Web server with routes to handle jobs listing, adding, removing, and updating jobs.
-/// - Binds the server to `127.0.0.1:<port>` (where <port> is a command line arg) and starts it.
+/// - Binds the server to `127.0.0.1:<port>` (where `<port>` is a command line arg) and starts it.
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Get command line arguments for the port:
@@ -56,9 +56,12 @@ async fn main() -> std::io::Result<()> {
     let port = if args.len() > 1 && is_valid_port(&args[1]) {
         &args[1] // Use the port from arguments if valid.
     } else {
-        eprintln!("Invalid port number or no port provided, using default: {}", default_port);
+        eprintln!(
+            "Invalid port number or no port provided, using default: {}",
+            default_port
+        );
         default_port // Use the default port if invalid or not provided
-    }; 
+    };
 
     let host: &str = "127.0.0.1"; // localhost
     let url: &str = &(host.to_owned() + ":" + port); // The URL the server will bind to
@@ -100,7 +103,9 @@ async fn main() -> std::io::Result<()> {
     }
 
     // Set RUST_LOG=info to allow server-side loggin:
-    if env::var("RUST_LOG").is_err() { env::set_var("RUST_LOG", "info"); }
+    if env::var("RUST_LOG").is_err() {
+        env::set_var("RUST_LOG", "info");
+    }
 
     // Create a custom logging system with specific filters to simplify loggin:
     Builder::new()

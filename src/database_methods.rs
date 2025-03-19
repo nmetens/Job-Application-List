@@ -3,13 +3,13 @@
 // Professor: Bart Massey
 
 //! This module containes the methods used to create, access, add to,
-//! remove, check if empty, and count for the database. Each method is 
-//! public and requires a connection to an active rusqlite::Connection 
+//! remove, check if empty, and count for the database. Each method is
+//! public and requires a connection to an active rusqlite::Connection
 //! object in order to modify the database.
 
 use crate::job;
-use log::info;
 use crate::job::Job;
+use log::info;
 
 /// Creates a `jobs` table in the SQLite database if it does not already exist.
 ///
@@ -48,7 +48,12 @@ pub fn enter_data(
 ) -> Result<(), rusqlite::Error> {
     connection.execute(
         "INSERT INTO jobs (job_title, hourly_rate, applied, link) VALUES (?1, ?2, ?3, ?4)",
-        rusqlite::params![a_job.get_title(), a_job.get_hourly(), a_job.get_applied(), a_job.get_link()], // Proper parameter format
+        rusqlite::params![
+            a_job.get_title(),
+            a_job.get_hourly(),
+            a_job.get_applied(),
+            a_job.get_link()
+        ], // Proper parameter format
     )?;
     Ok(())
 }
@@ -82,20 +87,30 @@ pub fn get_jobs(connection: &rusqlite::Connection) -> Result<Vec<Job>, rusqlite:
 
     // Iterate through the database and gather all the lines of data, creating the Job:
     let job_iterator = statement.query_map([], |row| {
-        let id: i64 = row.get::<_, i64>(0)?;            // id
-        let title: String = row.get::<_, String>(1)?;   // title
-        let hourly: f32 = row.get::<_, f32>(2)?;        // hourly
+        let id: i64 = row.get::<_, i64>(0)?; // id
+        let title: String = row.get::<_, String>(1)?; // title
+        let hourly: f32 = row.get::<_, f32>(2)?; // hourly
 
         // Properly handle the Result and convert applied value to "Yes" or "No"
-        let applied: i64 = row.get::<_, i64>(3)?;       // applied
-        let applied_status = if applied == 1 { "Yes".to_string() } else { "No".to_string() };
+        let applied: i64 = row.get::<_, i64>(3)?; // applied
+        let applied_status = if applied == 1 {
+            "Yes".to_string()
+        } else {
+            "No".to_string()
+        };
 
         // link
         //let link: String = row.get::<_, String>(4).ok().unwrap_or("No Link".to_string());
         let link = row.get::<_, String>(4).map(|s| s.to_string());
 
         // Return a new Job instance with applied as "Yes"/"No" instead of "1/0":
-        Ok(Job::new(Some(id), title, hourly, applied_status, Some(link.expect("No Link"))))
+        Ok(Job::new(
+            Some(id),
+            title,
+            hourly,
+            applied_status,
+            Some(link.expect("No Link")),
+        ))
     })?;
 
     let mut jobs = Vec::new();
@@ -139,12 +154,19 @@ pub fn _drop_table(
 /// # Returns
 /// * `Ok(())` if query exists on success.
 /// * `Err(rusqlite::Error)` if an error occurs.
-pub fn update_applied(connection: &rusqlite::Connection, new_status: bool, job_id: i64) -> rusqlite::Result<()> {
-    connection.execute("UPDATE jobs SET applied = ? WHERE id = ?", (new_status as i32, job_id))?;
+pub fn update_applied(
+    connection: &rusqlite::Connection,
+    new_status: bool,
+    job_id: i64,
+) -> rusqlite::Result<()> {
+    connection.execute(
+        "UPDATE jobs SET applied = ? WHERE id = ?",
+        (new_status as i32, job_id),
+    )?;
     Ok(())
 }
 
-/// Count all the rows in the database. 
+/// Count all the rows in the database.
 ///
 /// # Arguments
 /// * `connection` - A reference to an active SQLite connection (rusqlite::Connection).
@@ -162,13 +184,13 @@ pub fn count_rows(connection: &rusqlite::Connection) -> Result<i64, rusqlite::Er
     Ok(count)
 }
 
-/// Check if the database is empty. 
+/// Check if the database is empty.
 ///
 /// # Arguments
 /// * `connection` - A reference to an active SQLite connection (rusqlite::Connection).
 ///
 /// # Returns
-/// * `bool` The true or false value depending on the total rows in the database. 0 is true, any rows is false. 
+/// * `bool` The true or false value depending on the total rows in the database. 0 is true, any rows is false.
 /// * `Err(rusqlite::Error)` if an error occurs.
 pub fn database_empty(connection: &rusqlite::Connection) -> Result<bool, rusqlite::Error> {
     let row_count = count_rows(connection)?;
@@ -177,15 +199,15 @@ pub fn database_empty(connection: &rusqlite::Connection) -> Result<bool, rusqlit
 
 /// These are all the tests for each function in this module.
 /// In each test, a new database connection is created with the
-/// database schema and it is then populated and tested against 
+/// database schema and it is then populated and tested against
 /// the methods above.
 ///
 /// There are helper methods to reduce the size of the code.
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rusqlite::Connection;
     use crate::job::Job;
+    use rusqlite::Connection;
 
     // Helper function to set up an in-memory database and create the jobs table:
     fn setup_database() -> Connection {
@@ -204,13 +226,12 @@ mod tests {
         count_rows(&connection).expect("Failed to count rows")
     }
 
-
     // Create an empty database and check that it returns the Ok().
     // No jobs are added to the table, just creating a new database and a jobs table:
     #[test]
     fn test_create_table() {
         // Create an in-memory database for testing.
-        let connection = setup_database(); 
+        let connection = setup_database();
 
         // Call the create_table function to create the 'jobs' table.
         let result = create_table(&connection);
@@ -224,9 +245,9 @@ mod tests {
             FROM sqlite_master
             WHERE type='table' AND name='jobs'
         ";
-        
-        let table_exists: Result<String, rusqlite::Error> = connection
-            .query_row(query, (), |row| row.get(0)); // Use () for no parameters.
+
+        let table_exists: Result<String, rusqlite::Error> =
+            connection.query_row(query, (), |row| row.get(0)); // Use () for no parameters.
 
         // Assert that the table 'jobs' exists in the database.
         match table_exists {
@@ -240,7 +261,7 @@ mod tests {
     #[test]
     fn test_enter_data() {
         // Step 1: Set up an in-memory SQLite database for testing:
-        let connection = setup_database(); 
+        let connection = setup_database();
 
         // Step 2: Create the table using the create_table method (if not already created):
         create_table(&connection).expect("Failed to create table");
@@ -250,7 +271,7 @@ mod tests {
             Some(0),
             "Software Engineer".to_string(),
             45.0,
-            "1".to_string(), 
+            "1".to_string(),
             Some("https://example.com".to_string()),
         );
 
@@ -295,7 +316,6 @@ mod tests {
         }
     }
 
-
     // Create a new database, add a job, and remove it:
     #[test]
     fn test_remove_data() {
@@ -307,10 +327,10 @@ mod tests {
 
         // Step 3: Insert a job for testing:
         let job = Job::new(
-            Some(0), 
+            Some(0),
             "Software Engineer".to_string(),
             45.0,
-            "1".to_string(), 
+            "1".to_string(),
             Some("https://example.com".to_string()),
         );
 
@@ -321,7 +341,9 @@ mod tests {
         // Step 4: Verify the job was inserted:
         let query = "SELECT COUNT(*) FROM jobs WHERE job_title = ?";
         let count: i64 = connection
-            .query_row(query, rusqlite::params!["Software Engineer"], |row| row.get(0))
+            .query_row(query, rusqlite::params!["Software Engineer"], |row| {
+                row.get(0)
+            })
             .expect("Failed to query job count");
 
         // Assert that the job is inserted:
@@ -336,18 +358,29 @@ mod tests {
 
         // Step 7: Verify the job is removed from the database:
         let count_after_removal: i64 = connection
-            .query_row(query, rusqlite::params!["Software Engineer"], |row| row.get(0))
+            .query_row(query, rusqlite::params!["Software Engineer"], |row| {
+                row.get(0)
+            })
             .expect("Failed to query job count after removal");
 
         // Assert that the job is removed:
-        assert_eq!(count_after_removal, 0, "Job should be removed from the database.");
+        assert_eq!(
+            count_after_removal, 0,
+            "Job should be removed from the database."
+        );
 
         // Step 8: Attempt to remove a non-existent job (id 99999):
         let result_non_existent = remove_data(&connection, 99999);
 
         // Assert that no job was removed (returns false):
-        assert!(result_non_existent.is_ok(), "Failed to check non-existent job removal");
-        assert!(!result_non_existent.unwrap(), "No job should be removed for non-existent id.");
+        assert!(
+            result_non_existent.is_ok(),
+            "Failed to check non-existent job removal"
+        );
+        assert!(
+            !result_non_existent.unwrap(),
+            "No job should be removed for non-existent id."
+        );
     }
 
     // Create database, insert jobs, and get the jobs:
@@ -361,18 +394,18 @@ mod tests {
 
         // Step 3: Insert some jobs for testing:
         let job1 = Job::new(
-            Some(0), 
+            Some(0),
             "Software Engineer".to_string(),
             50.0,
-            "1".to_string(), 
-            Some("https://example1.com".to_string()), 
+            "1".to_string(),
+            Some("https://example1.com".to_string()),
         );
 
         let job2 = Job::new(
             Some(0),
             "Product Manager".to_string(),
             60.0,
-            "0".to_string(), 
+            "0".to_string(),
             Some("https://example2.com".to_string()),
         );
 
@@ -384,7 +417,11 @@ mod tests {
         let jobs_result = get_jobs(&connection);
 
         // Step 5: Assert that get_jobs was successful and jobs are returned:
-        assert!(jobs_result.is_ok(), "Failed to fetch jobs: {:?}", jobs_result);
+        assert!(
+            jobs_result.is_ok(),
+            "Failed to fetch jobs: {:?}",
+            jobs_result
+        );
         let jobs = jobs_result.unwrap();
         assert_eq!(jobs.len(), 2, "There should be 2 jobs in the result.");
 
@@ -412,7 +449,10 @@ mod tests {
         _drop_table(&connection, "jobs").expect("Failed to drop table");
 
         let result = connection.prepare("SELECT COUNT(*) FROM jobs");
-        assert!(result.is_err(), "The table should be dropped and not accessible");
+        assert!(
+            result.is_err(),
+            "The table should be dropped and not accessible"
+        );
     }
 
     // Ensure that the application status for a job can change:
@@ -433,7 +473,11 @@ mod tests {
 
         let jobs = get_jobs(&connection).expect("Failed to fetch jobs");
         assert_eq!(jobs.len(), 1, "There should be 1 job in the result.");
-        assert_eq!(jobs[0].get_applied(), "Yes", "The applied status should be updated to 'Yes'");
+        assert_eq!(
+            jobs[0].get_applied(),
+            "Yes",
+            "The applied status should be updated to 'Yes'"
+        );
     }
 
     // Count the rows and check for accuracy:
@@ -466,7 +510,10 @@ mod tests {
     #[test]
     fn test_database_empty() {
         let connection = setup_database();
-        assert!(database_empty(&connection).expect("Failed to check if database is empty"), "The database should be empty initially.");
+        assert!(
+            database_empty(&connection).expect("Failed to check if database is empty"),
+            "The database should be empty initially."
+        );
 
         let job = Job::new(
             Some(0),
@@ -477,6 +524,9 @@ mod tests {
         );
         insert_job(&connection, &job);
 
-        assert!(!database_empty(&connection).expect("Failed to check if database is empty"), "The database should not be empty after insertion.");
+        assert!(
+            !database_empty(&connection).expect("Failed to check if database is empty"),
+            "The database should not be empty after insertion."
+        );
     }
 }

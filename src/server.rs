@@ -2,20 +2,20 @@
 // Class: Rust 523
 // Professor: Bart Massey
 
-///! # Server Module
-///
-///! This module contains all the mothods used by the server to 
-///! list the jobs in the database, add a jobs to the database,
-///! remove a job from the database, and change the applciation
-///! status for a job in the database.
+//! # Server Module
+//!
+//! This module contains all the mothods used by the server to
+//! list the jobs in the database, add a jobs to the database,
+//! remove a job from the database, and change the applciation
+//! status for a job in the database.
 
-use log::{info, error};
-use actix_web::{web, HttpResponse, Responder};
-use rusqlite::{Connection};
-use crate::database_methods::{get_jobs, enter_data, remove_data, update_applied};
-use crate::job::{JobRemovalForm, JobStatusUpdate, ApiResponse};
-use tera::Tera;
+use crate::database_methods::{enter_data, get_jobs, remove_data, update_applied};
 use crate::job::Job;
+use crate::job::{ApiResponse, JobRemovalForm, JobStatusUpdate};
+use actix_web::{web, HttpResponse, Responder};
+use log::{error, info};
+use rusqlite::Connection;
+use tera::Tera;
 
 /// Remove a Job from the server.
 ///
@@ -24,8 +24,7 @@ use crate::job::Job;
 /// - Captures the id from the HTML form that asks the user which job to delete.
 /// - Calls the database method that removes a job by id and returns to home route.
 pub async fn rem_job(form: web::Form<JobRemovalForm>) -> impl Responder {
-
-    info!("DELETE Request to Database..."); 
+    info!("DELETE Request to Database...");
     let database_file = "jobs_data.db";
 
     let connection = match Connection::open(database_file) {
@@ -44,17 +43,23 @@ pub async fn rem_job(form: web::Form<JobRemovalForm>) -> impl Responder {
         Ok(true) => {
             // Redirect to the jobs list page after successful form submission:
             info!("Successful DELETE in database.");
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
-        },
+            HttpResponse::Found()
+                .append_header(("LOCATION", "/"))
+                .finish()
+        }
 
         Ok(false) => {
             info!("No job with id {} found in the database.", job_id);
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
-        },
+            HttpResponse::Found()
+                .append_header(("LOCATION", "/"))
+                .finish()
+        }
 
         Err(_) => {
             eprintln!("Error removing the job from the database.");
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
+            HttpResponse::Found()
+                .append_header(("LOCATION", "/"))
+                .finish()
         }
     }
 }
@@ -69,7 +74,6 @@ pub async fn rem_job(form: web::Form<JobRemovalForm>) -> impl Responder {
 /// - Calls the database method to enter the job.
 /// - Checks that the result is as expected.
 pub async fn add_job(form: web::Form<Job>) -> impl Responder {
-
     info!("POST Request to Database...");
     info!("Received Job Form: {:?}", form);
     // If the form has been submitted, process the data (POST)
@@ -94,7 +98,7 @@ pub async fn add_job(form: web::Form<Job>) -> impl Responder {
         form.get_title().clone(),
         form.get_hourly(),
         applied_int.to_string(),
-        Some(form.get_link().clone())
+        Some(form.get_link().clone()),
     );
     info!("Job Link: {:?}", new_job.get_link());
 
@@ -104,8 +108,10 @@ pub async fn add_job(form: web::Form<Job>) -> impl Responder {
         Ok(_) => {
             // Redirect to the jobs list page after successful form submission
             info!("Successful POST to database.");
-            HttpResponse::Found().append_header(("LOCATION", "/")).finish()
-    },
+            HttpResponse::Found()
+                .append_header(("LOCATION", "/"))
+                .finish()
+        }
         Err(err) => {
             eprintln!("Error inserting job into the database: {}", err);
             HttpResponse::InternalServerError().body("Error inserting job into the database.")
@@ -144,13 +150,14 @@ pub async fn list_jobs(tera: web::Data<Tera>) -> impl Responder {
                 Ok(renderer) => HttpResponse::Ok().content_type("text/html").body(renderer),
                 Err(err) => {
                     error!("Template rendering error: {:?}", err);
-                    HttpResponse::InternalServerError().body(format!("Error rendering template: {:?}", err))
+                    HttpResponse::InternalServerError()
+                        .body(format!("Error rendering template: {:?}", err))
                 }
             }
-        },
+        }
         Err(err) => {
-             error!("Error fetching jobs: {}", err);
-             HttpResponse::InternalServerError().body("Error fetching jobs.")
+            error!("Error fetching jobs: {}", err);
+            HttpResponse::InternalServerError().body("Error fetching jobs.")
         }
     }
 }
@@ -165,7 +172,10 @@ pub async fn list_jobs(tera: web::Data<Tera>) -> impl Responder {
 /// This method returns JSON to the front end Javascript function so that the
 /// application status can be updated automatically with a color change.
 pub async fn update(form: web::Json<JobStatusUpdate>) -> impl Responder {
-    println!("Received update request: id={}, applied={}", form.id, form.applied);
+    println!(
+        "Received update request: id={}, applied={}",
+        form.id, form.applied
+    );
     // Job application database file:
     let database_file: &str = "jobs_data.db";
 
@@ -187,7 +197,7 @@ pub async fn update(form: web::Json<JobStatusUpdate>) -> impl Responder {
         Ok(_) => {
             info!("Successfully updated application status in database.");
             HttpResponse::Ok().json(ApiResponse { success: true }) // Return JSON to the JS Method.
-        },
+        }
         Err(err) => {
             eprintln!("Error updating application status in database: {}", err);
             HttpResponse::InternalServerError().json(ApiResponse { success: false })
