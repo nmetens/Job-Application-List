@@ -46,6 +46,10 @@ Add a new Job:
 Remove a Job by id:
 ![Remove Job](static/remove-job.png)
 
+## Project Demonstration Viedo
+
+![Watch me explain and showcase my project.](https://www.youtube.com/watch?v=hC-yeYZ3UYg)
+
 ### Resources
 [File Handling](https://doc.rust-lang.org/std/fs/struct.File.html)
 [CSV](https://docs.rs/csv/latest/csv/)
