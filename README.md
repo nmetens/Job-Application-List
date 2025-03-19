@@ -3,7 +3,7 @@
 
 # Job Application List
 
-A Rust-based project that helps you manage your job applications in an easy-to-use way. It allows you to view, add, remove, and update job listings from a SQLite database, all through a local server. The project features a neat front-end built with HTML, CSS, and JavaScript.
+A Rust-based project that helps you manage your job applications in an easy-to-use way. It allows you to view, add, remove, and update job listings from a SQLite database, all through a local server. The back-end is build in Rust using the Actix-Web crate, along with rusqlite for the database schema. The project features a neat front-end built with HTML, CSS, and JavaScript.
 
 ## Features
 
@@ -18,6 +18,13 @@ A Rust-based project that helps you manage your job applications in an easy-to-u
 Each job in the database has an id, a job title, an hourly rate, an application status, and a link to the application on the web.
 
 ## Build The Project
+
+1. Clone the repository with all of the dependancies and files needed to run the server.
+    `git clone git@github.com:nmetens/Job-Application-List.git`
+2. Navigate to the project repo and run the script `./run.sh`.
+2. You can use cargo to build it, or you can build it using `./run.sh build`
+3. To run the server on the default port "8000": `./run.sh run`
+4. To run the server on another port: `./run.sh run <port>`
 
 Once inside the Project Directory, you can run either `cargo build` or `./run.sh build`.
 I have implemented a `run.sh` bash script which explains all of the parts of how to work the project.
