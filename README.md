@@ -48,7 +48,7 @@ Remove a Job by id:
 
 ## Project Demonstration Viedo
 
-![Watch me explain and showcase my project.](https://www.youtube.com/watch?v=hC-yeYZ3UYg)
+[Watch me explain and showcase my project.](https://www.youtube.com/watch?v=hC-yeYZ3UYg)
 
 ### Resources
 [File Handling](https://doc.rust-lang.org/std/fs/struct.File.html)
